@@ -1,3 +1,6 @@
+import sqlite3
+
+
 class Student:
     def __init__(self, name, roll_no, department, email):
         self.name = name
@@ -14,32 +17,27 @@ class Student:
         print("---------------------------")
 
 
-# Creating student objects
+def create_database():
+    connection = sqlite3.connect("student.db")
 
-student1 = Student(
-    "Triveni",
-    "101",
-    "CSE",
-    "triveni@example.com"
-)
+    cursor = connection.cursor()
 
-student2 = Student(
-    "Priya",
-    "102",
-    "CSE",
-    "priya@example.com"
-)
-student3 = Student(
-    "Rahul",
-    "103",
-    "ECE",
-    "rahul@example.com"
-)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            roll_no TEXT UNIQUE NOT NULL,
+            department TEXT NOT NULL,
+            email TEXT NOT NULL
+        )
+    """)
+
+    connection.commit()
+    connection.close()
 
 
+# Create database
+create_database()
 
-# Display student details
-
-student1.display_details()
-student2.display_details()
-student3.display_details()
+print("Student Management System")
+print("Database is ready!")
