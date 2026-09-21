@@ -19,7 +19,21 @@ def create_database():
     connection.commit()
     connection.close()
 
-    print("Database created successfully!")
+
+def add_student(name, roll_no, department, email):
+    connection = sqlite3.connect("student.db")
+
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        INSERT INTO students (name, roll_no, department, email)
+        VALUES (?, ?, ?, ?)
+    """, (name, roll_no, department, email))
+
+    connection.commit()
+    connection.close()
+
+    print("Student added successfully!")
 
 
 create_database()
