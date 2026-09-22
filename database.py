@@ -36,4 +36,18 @@ def add_student(name, roll_no, department, email):
     print("Student added successfully!")
 
 
+def view_students():
+    connection = sqlite3.connect("student.db")
+
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM students")
+
+    students = cursor.fetchall()
+
+    connection.close()
+
+    return students
+
+
 create_database()

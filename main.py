@@ -1,13 +1,44 @@
-from database import add_student
+from database import add_student, view_students
 
 
 print("================================")
 print("   STUDENT MANAGEMENT SYSTEM")
 print("================================")
 
-name = input("Enter Student Name: ")
-roll_no = input("Enter Roll Number: ")
-department = input("Enter Department: ")
-email = input("Enter Email: ")
+print("1. Add Student")
+print("2. View All Students")
 
-add_student(name, roll_no, department, email)
+choice = input("Enter your choice: ")
+
+
+if choice == "1":
+
+    name = input("Enter Student Name: ")
+    roll_no = input("Enter Roll Number: ")
+    department = input("Enter Department: ")
+    email = input("Enter Email: ")
+
+    add_student(name, roll_no, department, email)
+
+
+elif choice == "2":
+
+    students = view_students()
+
+    print("\n========== ALL STUDENTS ==========")
+
+    if len(students) == 0:
+        print("No students found.")
+
+    else:
+        for student in students:
+            print("ID:", student[0])
+            print("Name:", student[1])
+            print("Roll No:", student[2])
+            print("Department:", student[3])
+            print("Email:", student[4])
+            print("--------------------------------")
+
+
+else:
+    print("Invalid choice!")
