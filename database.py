@@ -50,4 +50,21 @@ def view_students():
     return students
 
 
+def search_student(roll_no):
+    connection = sqlite3.connect("student.db")
+
+    cursor = connection.cursor()
+
+    cursor.execute(
+        "SELECT * FROM students WHERE roll_no = ?",
+        (roll_no,)
+    )
+
+    student = cursor.fetchone()
+
+    connection.close()
+
+    return student
+
+
 create_database()
