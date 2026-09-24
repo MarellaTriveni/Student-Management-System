@@ -1,4 +1,4 @@
-from database import add_student, view_students, search_student
+from database import add_student, view_students, search_student, update_student
 
 
 print("================================")
@@ -8,6 +8,7 @@ print("================================")
 print("1. Add Student")
 print("2. View All Students")
 print("3. Search Student")
+print("4. Update Student")
 
 choice = input("Enter your choice: ")
 
@@ -54,6 +55,39 @@ elif choice == "3":
         print("Roll No:", student[2])
         print("Department:", student[3])
         print("Email:", student[4])
+
+    else:
+        print("Student not found.")
+
+
+elif choice == "4":
+
+    roll_no = input("Enter Roll Number: ")
+
+    student = search_student(roll_no)
+
+    if student:
+
+        print("\nCurrent Details:")
+        print("Name:", student[1])
+        print("Department:", student[3])
+        print("Email:", student[4])
+
+        print("\nEnter New Details")
+
+        name = input("Enter New Name: ")
+        department = input("Enter New Department: ")
+        email = input("Enter New Email: ")
+
+        result = update_student(
+            roll_no,
+            name,
+            department,
+            email
+        )
+
+        if result > 0:
+            print("Student updated successfully!")
 
     else:
         print("Student not found.")
