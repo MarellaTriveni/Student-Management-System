@@ -81,4 +81,22 @@ def update_student(roll_no, name, department, email):
     return rows_updated
 
 
+def delete_student(roll_no):
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    cursor.execute(
+        "DELETE FROM students WHERE roll_no = ?",
+        (roll_no,)
+    )
+
+    connection.commit()
+
+    rows_deleted = cursor.rowcount
+
+    connection.close()
+
+    return rows_deleted
+
+
 create_database()
