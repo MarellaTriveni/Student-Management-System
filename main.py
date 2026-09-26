@@ -11,134 +11,172 @@ print("================================")
 print("   STUDENT MANAGEMENT SYSTEM")
 print("================================")
 
-print("1. Add Student")
-print("2. View All Students")
-print("3. Search Student")
-print("4. Update Student")
-print("5. Delete Student")
 
-choice = input("Enter your choice: ")
+while True:
 
+    print("\n========== MENU ==========")
+    print("1. Add Student")
+    print("2. View All Students")
+    print("3. Search Student")
+    print("4. Update Student")
+    print("5. Delete Student")
+    print("6. Exit")
 
-# 1. Add Student
-if choice == "1":
-
-    name = input("Enter Student Name: ")
-    roll_no = input("Enter Roll Number: ")
-    department = input("Enter Department: ")
-    email = input("Enter Email: ")
-
-    add_student(name, roll_no, department, email)
+    choice = input("Enter your choice: ")
 
 
-# 2. View All Students
-elif choice == "2":
+    # 1. Add Student
+    if choice == "1":
 
-    students = view_students()
+        print("\n========== ADD STUDENT ==========")
 
-    print("\n========== ALL STUDENTS ==========")
+        name = input("Enter Student Name: ")
+        roll_no = input("Enter Roll Number: ")
+        department = input("Enter Department: ")
+        email = input("Enter Email: ")
 
-    if len(students) == 0:
-        print("No students found.")
+        add_student(
+            name,
+            roll_no,
+            department,
+            email
+        )
 
-    else:
-        for student in students:
+
+    # 2. View All Students
+    elif choice == "2":
+
+        students = view_students()
+
+        print("\n========== ALL STUDENTS ==========")
+
+        if len(students) == 0:
+
+            print("No students found.")
+
+        else:
+
+            for student in students:
+
+                print("ID:", student[0])
+                print("Name:", student[1])
+                print("Roll No:", student[2])
+                print("Department:", student[3])
+                print("Email:", student[4])
+                print("--------------------------------")
+
+
+    # 3. Search Student
+    elif choice == "3":
+
+        print("\n========== SEARCH STUDENT ==========")
+
+        roll_no = input("Enter Roll Number: ")
+
+        student = search_student(roll_no)
+
+        if student:
+
+            print("\nStudent Found!")
             print("ID:", student[0])
             print("Name:", student[1])
             print("Roll No:", student[2])
             print("Department:", student[3])
             print("Email:", student[4])
-            print("--------------------------------")
-
-
-# 3. Search Student
-elif choice == "3":
-
-    roll_no = input("Enter Roll Number: ")
-
-    student = search_student(roll_no)
-
-    if student:
-
-        print("\n========== STUDENT FOUND ==========")
-        print("ID:", student[0])
-        print("Name:", student[1])
-        print("Roll No:", student[2])
-        print("Department:", student[3])
-        print("Email:", student[4])
-
-    else:
-        print("Student not found.")
-
-
-# 4. Update Student
-elif choice == "4":
-
-    roll_no = input("Enter Roll Number: ")
-
-    student = search_student(roll_no)
-
-    if student:
-
-        print("\n========== CURRENT DETAILS ==========")
-        print("Name:", student[1])
-        print("Roll No:", student[2])
-        print("Department:", student[3])
-        print("Email:", student[4])
-
-        print("\nEnter New Details")
-
-        name = input("Enter New Name: ")
-        department = input("Enter New Department: ")
-        email = input("Enter New Email: ")
-
-        result = update_student(
-            roll_no,
-            name,
-            department,
-            email
-        )
-
-        if result > 0:
-            print("\nStudent updated successfully!")
-
-    else:
-        print("Student not found.")
-
-
-# 5. Delete Student
-elif choice == "5":
-
-    roll_no = input("Enter Roll Number: ")
-
-    student = search_student(roll_no)
-
-    if student:
-
-        print("\n========== STUDENT DETAILS ==========")
-        print("Name:", student[1])
-        print("Roll No:", student[2])
-        print("Department:", student[3])
-        print("Email:", student[4])
-
-        confirm = input(
-            "\nAre you sure you want to delete? (yes/no): "
-        )
-
-        if confirm.lower() == "yes":
-
-            result = delete_student(roll_no)
-
-            if result > 0:
-                print("\nStudent deleted successfully!")
 
         else:
-            print("\nDelete operation cancelled.")
 
+            print("Student not found.")
+
+
+    # 4. Update Student
+    elif choice == "4":
+
+        print("\n========== UPDATE STUDENT ==========")
+
+        roll_no = input("Enter Roll Number: ")
+
+        student = search_student(roll_no)
+
+        if student:
+
+            print("\nCurrent Details:")
+            print("Name:", student[1])
+            print("Roll No:", student[2])
+            print("Department:", student[3])
+            print("Email:", student[4])
+
+            print("\nEnter New Details")
+
+            name = input("Enter New Name: ")
+            department = input("Enter New Department: ")
+            email = input("Enter New Email: ")
+
+            result = update_student(
+                roll_no,
+                name,
+                department,
+                email
+            )
+
+            if result > 0:
+
+                print("\nStudent updated successfully!")
+
+        else:
+
+            print("Student not found.")
+
+
+    # 5. Delete Student
+    elif choice == "5":
+
+        print("\n========== DELETE STUDENT ==========")
+
+        roll_no = input("Enter Roll Number: ")
+
+        student = search_student(roll_no)
+
+        if student:
+
+            print("\nStudent Details:")
+            print("Name:", student[1])
+            print("Roll No:", student[2])
+            print("Department:", student[3])
+            print("Email:", student[4])
+
+            confirm = input(
+                "\nAre you sure you want to delete? (yes/no): "
+            )
+
+            if confirm.lower() == "yes":
+
+                result = delete_student(roll_no)
+
+                if result > 0:
+
+                    print("\nStudent deleted successfully!")
+
+            else:
+
+                print("\nDelete operation cancelled.")
+
+        else:
+
+            print("Student not found.")
+
+
+    # 6. Exit
+    elif choice == "6":
+
+        print("\nThank you for using Student Management System!")
+        print("Program exited successfully.")
+
+        break
+
+
+    # Invalid choice
     else:
-        print("Student not found.")
 
-
-# Invalid choice
-else:
-    print("Invalid choice!")
+        print("\nInvalid choice!")
+        print("Please enter a number from 1 to 6.")

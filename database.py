@@ -73,9 +73,7 @@ def update_student(roll_no, name, department, email):
     """, (name, department, email, roll_no))
 
     connection.commit()
-
     rows_updated = cursor.rowcount
-
     connection.close()
 
     return rows_updated
@@ -91,9 +89,7 @@ def delete_student(roll_no):
     )
 
     connection.commit()
-
     rows_deleted = cursor.rowcount
-
     connection.close()
 
     return rows_deleted
