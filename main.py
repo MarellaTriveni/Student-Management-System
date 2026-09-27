@@ -7,6 +7,16 @@ from database import (
 )
 
 
+def get_required_input(message):
+    while True:
+        value = input(message).strip()
+
+        if value:
+            return value
+
+        print("Input cannot be empty. Please try again.")
+
+
 print("================================")
 print("   STUDENT MANAGEMENT SYSTEM")
 print("================================")
@@ -22,7 +32,7 @@ while True:
     print("5. Delete Student")
     print("6. Exit")
 
-    choice = input("Enter your choice: ")
+    choice = input("Enter your choice: ").strip()
 
 
     # 1. Add Student
@@ -30,10 +40,10 @@ while True:
 
         print("\n========== ADD STUDENT ==========")
 
-        name = input("Enter Student Name: ")
-        roll_no = input("Enter Roll Number: ")
-        department = input("Enter Department: ")
-        email = input("Enter Email: ")
+        name = get_required_input("Enter Student Name: ")
+        roll_no = get_required_input("Enter Roll Number: ")
+        department = get_required_input("Enter Department: ")
+        email = get_required_input("Enter Email: ")
 
         add_student(
             name,
@@ -43,19 +53,17 @@ while True:
         )
 
 
-    # 2. View All Students
+    # 2. View Students
     elif choice == "2":
-
-        students = view_students()
 
         print("\n========== ALL STUDENTS ==========")
 
-        if len(students) == 0:
+        students = view_students()
 
+        if not students:
             print("No students found.")
 
         else:
-
             for student in students:
 
                 print("ID:", student[0])
@@ -71,7 +79,7 @@ while True:
 
         print("\n========== SEARCH STUDENT ==========")
 
-        roll_no = input("Enter Roll Number: ")
+        roll_no = get_required_input("Enter Roll Number: ")
 
         student = search_student(roll_no)
 
@@ -94,7 +102,7 @@ while True:
 
         print("\n========== UPDATE STUDENT ==========")
 
-        roll_no = input("Enter Roll Number: ")
+        roll_no = get_required_input("Enter Roll Number: ")
 
         student = search_student(roll_no)
 
@@ -108,9 +116,9 @@ while True:
 
             print("\nEnter New Details")
 
-            name = input("Enter New Name: ")
-            department = input("Enter New Department: ")
-            email = input("Enter New Email: ")
+            name = get_required_input("Enter New Name: ")
+            department = get_required_input("Enter New Department: ")
+            email = get_required_input("Enter New Email: ")
 
             result = update_student(
                 roll_no,
@@ -120,7 +128,6 @@ while True:
             )
 
             if result > 0:
-
                 print("\nStudent updated successfully!")
 
         else:
@@ -133,7 +140,7 @@ while True:
 
         print("\n========== DELETE STUDENT ==========")
 
-        roll_no = input("Enter Roll Number: ")
+        roll_no = get_required_input("Enter Roll Number: ")
 
         student = search_student(roll_no)
 
@@ -147,14 +154,13 @@ while True:
 
             confirm = input(
                 "\nAre you sure you want to delete? (yes/no): "
-            )
+            ).strip().lower()
 
-            if confirm.lower() == "yes":
+            if confirm == "yes":
 
                 result = delete_student(roll_no)
 
                 if result > 0:
-
                     print("\nStudent deleted successfully!")
 
             else:

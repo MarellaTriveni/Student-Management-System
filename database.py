@@ -20,18 +20,25 @@ def create_database():
 
 
 def add_student(name, roll_no, department, email):
-    connection = sqlite3.connect("student.db")
-    cursor = connection.cursor()
+    try:
+        connection = sqlite3.connect("student.db")
+        cursor = connection.cursor()
 
-    cursor.execute("""
-        INSERT INTO students (name, roll_no, department, email)
-        VALUES (?, ?, ?, ?)
-    """, (name, roll_no, department, email))
+        cursor.execute("""
+            INSERT INTO students (name, roll_no, department, email)
+            VALUES (?, ?, ?, ?)
+        """, (name, roll_no, department, email))
 
-    connection.commit()
-    connection.close()
+        connection.commit()
+        connection.close()
 
-    print("Student added successfully!")
+        print("\nStudent added successfully!")
+
+    except sqlite3.IntegrityError:
+        print("\nError: Roll Number already exists.")
+
+    except sqlite3.Error as error:
+        print("\nDatabase error:", error)
 
 
 def view_students():
@@ -73,7 +80,9 @@ def update_student(roll_no, name, department, email):
     """, (name, department, email, roll_no))
 
     connection.commit()
+
     rows_updated = cursor.rowcount
+
     connection.close()
 
     return rows_updated
@@ -89,7 +98,9 @@ def delete_student(roll_no):
     )
 
     connection.commit()
+
     rows_deleted = cursor.rowcount
+
     connection.close()
 
     return rows_deleted
