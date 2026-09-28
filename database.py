@@ -19,33 +19,38 @@ def create_database():
     connection.close()
 
 
+# Add Student
 def add_student(name, roll_no, department, email):
-    try:
-        connection = sqlite3.connect("student.db")
-        cursor = connection.cursor()
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
 
+    try:
         cursor.execute("""
             INSERT INTO students (name, roll_no, department, email)
             VALUES (?, ?, ?, ?)
         """, (name, roll_no, department, email))
 
         connection.commit()
-        connection.close()
-
         print("\nStudent added successfully!")
 
     except sqlite3.IntegrityError:
-        print("\nError: Roll Number already exists.")
+        print("\nRoll Number already exists!")
 
-    except sqlite3.Error as error:
-        print("\nDatabase error:", error)
+    finally:
+        connection.close()
 
 
+# View All Students
 def view_students():
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM students")
+    cursor.execute("""
+        SELECT id, name, roll_no, department, email
+        FROM students
+        ORDER BY name ASC
+    """)
+
     students = cursor.fetchall()
 
     connection.close()
@@ -53,6 +58,7 @@ def view_students():
     return students
 
 
+# Search Student
 def search_student(roll_no):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -69,6 +75,7 @@ def search_student(roll_no):
     return student
 
 
+# Update Student
 def update_student(roll_no, name, department, email):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -88,6 +95,7 @@ def update_student(roll_no, name, department, email):
     return rows_updated
 
 
+# Delete Student
 def delete_student(roll_no):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -106,4 +114,30 @@ def delete_student(roll_no):
     return rows_deleted
 
 
+# Student Statistics
+def get_statistics():
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    # Total students
+    cursor.execute("SELECT COUNT(*) FROM students")
+
+    total_students = cursor.fetchone()[0]
+
+    # Department-wise students
+    cursor.execute("""
+        SELECT department, COUNT(*)
+        FROM students
+        GROUP BY department
+        ORDER BY department
+    """)
+
+    department_counts = cursor.fetchall()
+
+    connection.close()
+
+    return total_students, department_counts
+
+
+# Create database when program starts
 create_database()
