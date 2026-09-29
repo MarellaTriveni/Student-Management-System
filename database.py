@@ -21,27 +21,34 @@ def create_database():
 
 # Add Student
 def add_student(name, roll_no, department, email):
+
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
     try:
+
         cursor.execute("""
-            INSERT INTO students (name, roll_no, department, email)
+            INSERT INTO students
+            (name, roll_no, department, email)
             VALUES (?, ?, ?, ?)
         """, (name, roll_no, department, email))
 
         connection.commit()
-        print("\nStudent added successfully!")
+
+        return True
 
     except sqlite3.IntegrityError:
-        print("\nRoll Number already exists!")
+
+        return False
 
     finally:
+
         connection.close()
 
 
-# View All Students
+# View Students
 def view_students():
+
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -60,6 +67,7 @@ def view_students():
 
 # Search Student
 def search_student(roll_no):
+
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -77,12 +85,15 @@ def search_student(roll_no):
 
 # Update Student
 def update_student(roll_no, name, department, email):
+
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
     cursor.execute("""
         UPDATE students
-        SET name = ?, department = ?, email = ?
+        SET name = ?,
+            department = ?,
+            email = ?
         WHERE roll_no = ?
     """, (name, department, email, roll_no))
 
@@ -97,6 +108,7 @@ def update_student(roll_no, name, department, email):
 
 # Delete Student
 def delete_student(roll_no):
+
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -116,15 +128,14 @@ def delete_student(roll_no):
 
 # Student Statistics
 def get_statistics():
+
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
-    # Total students
     cursor.execute("SELECT COUNT(*) FROM students")
 
     total_students = cursor.fetchone()[0]
 
-    # Department-wise students
     cursor.execute("""
         SELECT department, COUNT(*)
         FROM students
@@ -139,5 +150,4 @@ def get_statistics():
     return total_students, department_counts
 
 
-# Create database when program starts
 create_database()
