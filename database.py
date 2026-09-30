@@ -1,7 +1,12 @@
 import sqlite3
 
 
+# --------------------------------
+# CREATE DATABASE
+# --------------------------------
+
 def create_database():
+
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -19,7 +24,10 @@ def create_database():
     connection.close()
 
 
-# Add Student
+# --------------------------------
+# ADD STUDENT
+# --------------------------------
+
 def add_student(name, roll_no, department, email):
 
     connection = sqlite3.connect("student.db")
@@ -46,7 +54,10 @@ def add_student(name, roll_no, department, email):
         connection.close()
 
 
-# View Students
+# --------------------------------
+# VIEW ALL STUDENTS
+# --------------------------------
+
 def view_students():
 
     connection = sqlite3.connect("student.db")
@@ -65,7 +76,10 @@ def view_students():
     return students
 
 
-# Search Student
+# --------------------------------
+# SEARCH STUDENT
+# --------------------------------
+
 def search_student(roll_no):
 
     connection = sqlite3.connect("student.db")
@@ -83,7 +97,33 @@ def search_student(roll_no):
     return student
 
 
-# Update Student
+# --------------------------------
+# SEARCH BY DEPARTMENT
+# --------------------------------
+
+def search_by_department(department):
+
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id, name, roll_no, department, email
+        FROM students
+        WHERE LOWER(department) = LOWER(?)
+        ORDER BY name ASC
+    """, (department,))
+
+    students = cursor.fetchall()
+
+    connection.close()
+
+    return students
+
+
+# --------------------------------
+# UPDATE STUDENT
+# --------------------------------
+
 def update_student(roll_no, name, department, email):
 
     connection = sqlite3.connect("student.db")
@@ -106,7 +146,10 @@ def update_student(roll_no, name, department, email):
     return rows_updated
 
 
-# Delete Student
+# --------------------------------
+# DELETE STUDENT
+# --------------------------------
+
 def delete_student(roll_no):
 
     connection = sqlite3.connect("student.db")
@@ -126,7 +169,10 @@ def delete_student(roll_no):
     return rows_deleted
 
 
-# Student Statistics
+# --------------------------------
+# STUDENT STATISTICS
+# --------------------------------
+
 def get_statistics():
 
     connection = sqlite3.connect("student.db")
@@ -150,4 +196,5 @@ def get_statistics():
     return total_students, department_counts
 
 
+# Create database when program starts
 create_database()

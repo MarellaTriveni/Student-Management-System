@@ -4,6 +4,7 @@ from database import (
     add_student,
     view_students,
     search_student,
+    search_by_department,
     update_student,
     delete_student,
     get_statistics
@@ -15,7 +16,10 @@ print("      STUDENT MANAGEMENT SYSTEM")
 print("========================================")
 
 
-# Check empty input
+# --------------------------------
+# CHECK EMPTY INPUT
+# --------------------------------
+
 def get_input(message):
 
     while True:
@@ -28,7 +32,10 @@ def get_input(message):
         print("Input cannot be empty. Please try again.")
 
 
-# Check email
+# --------------------------------
+# CHECK EMAIL
+# --------------------------------
+
 def valid_email(email):
 
     pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
@@ -36,11 +43,41 @@ def valid_email(email):
     return re.match(pattern, email) is not None
 
 
-# Check roll number
+# --------------------------------
+# CHECK ROLL NUMBER
+# --------------------------------
+
 def valid_roll_number(roll_no):
 
     return roll_no.isdigit()
 
+
+# --------------------------------
+# DISPLAY STUDENTS
+# --------------------------------
+
+def display_students(students):
+
+    if not students:
+
+        print("\nNo students found.")
+
+        return
+
+    for student in students:
+
+        print("\nID:", student[0])
+        print("Name:", student[1])
+        print("Roll No:", student[2])
+        print("Department:", student[3])
+        print("Email:", student[4])
+
+        print("----------------------------")
+
+
+# --------------------------------
+# MAIN MENU
+# --------------------------------
 
 while True:
 
@@ -51,7 +88,8 @@ while True:
     print("4. Update Student")
     print("5. Delete Student")
     print("6. Student Statistics")
-    print("7. Exit")
+    print("7. Search by Department")
+    print("8. Exit")
     print("==========================")
 
     choice = input("Enter your choice: ").strip()
@@ -72,6 +110,7 @@ while True:
         if not valid_roll_number(roll_no):
 
             print("\nRoll Number must contain only numbers.")
+
             continue
 
         department = get_input("Enter Department: ")
@@ -81,7 +120,9 @@ while True:
         if not valid_email(email):
 
             print("\nInvalid email format.")
+
             print("Example: student@gmail.com")
+
             continue
 
         result = add_student(
@@ -101,7 +142,7 @@ while True:
 
 
     # --------------------------------
-    # 2. VIEW STUDENTS
+    # 2. VIEW ALL STUDENTS
     # --------------------------------
 
     elif choice == "2":
@@ -110,21 +151,7 @@ while True:
 
         students = view_students()
 
-        if not students:
-
-            print("No students found.")
-
-        else:
-
-            for student in students:
-
-                print("\nID:", student[0])
-                print("Name:", student[1])
-                print("Roll No:", student[2])
-                print("Department:", student[3])
-                print("Email:", student[4])
-
-                print("----------------------------")
+        display_students(students)
 
 
     # --------------------------------
@@ -190,6 +217,7 @@ while True:
             if not valid_email(email):
 
                 print("\nInvalid email format.")
+
                 continue
 
             result = update_student(
@@ -249,14 +277,13 @@ while True:
 
                 print("\nDelete cancelled.")
 
-
         else:
 
             print("\nStudent not found. ❌")
 
 
     # --------------------------------
-    # 6. STATISTICS
+    # 6. STUDENT STATISTICS
     # --------------------------------
 
     elif choice == "6":
@@ -286,10 +313,35 @@ while True:
 
 
     # --------------------------------
-    # 7. EXIT
+    # 7. SEARCH BY DEPARTMENT
     # --------------------------------
 
     elif choice == "7":
+
+        print("\n========== SEARCH BY DEPARTMENT ==========")
+
+        department = get_input(
+            "Enter Department: "
+        )
+
+        students = search_by_department(
+            department
+        )
+
+        print(
+            "\nStudents in",
+            department.upper(),
+            "department:"
+        )
+
+        display_students(students)
+
+
+    # --------------------------------
+    # 8. EXIT
+    # --------------------------------
+
+    elif choice == "8":
 
         print("\n========================================")
         print("Thank you for using Student Management System!")
@@ -306,4 +358,5 @@ while True:
     else:
 
         print("\nInvalid choice!")
-        print("Please enter a number from 1 to 7.")
+
+        print("Please enter a number from 1 to 8.")
