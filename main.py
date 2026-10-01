@@ -5,6 +5,7 @@ from database import (
     view_students,
     search_student,
     search_by_department,
+    search_by_name,
     update_student,
     delete_student,
     get_statistics
@@ -84,12 +85,13 @@ while True:
     print("\n========== MENU ==========")
     print("1. Add Student")
     print("2. View All Students")
-    print("3. Search Student")
-    print("4. Update Student")
-    print("5. Delete Student")
-    print("6. Student Statistics")
-    print("7. Search by Department")
-    print("8. Exit")
+    print("3. Search Student by Roll Number")
+    print("4. Search Student by Name")
+    print("5. Update Student")
+    print("6. Delete Student")
+    print("7. Student Statistics")
+    print("8. Search by Department")
+    print("9. Exit")
     print("==========================")
 
     choice = input("Enter your choice: ").strip()
@@ -120,7 +122,6 @@ while True:
         if not valid_email(email):
 
             print("\nInvalid email format.")
-
             print("Example: student@gmail.com")
 
             continue
@@ -155,12 +156,12 @@ while True:
 
 
     # --------------------------------
-    # 3. SEARCH STUDENT
+    # 3. SEARCH BY ROLL NUMBER
     # --------------------------------
 
     elif choice == "3":
 
-        print("\n========== SEARCH STUDENT ==========")
+        print("\n========== SEARCH BY ROLL NUMBER ==========")
 
         roll_no = get_input("Enter Roll Number: ")
 
@@ -182,10 +183,27 @@ while True:
 
 
     # --------------------------------
-    # 4. UPDATE STUDENT
+    # 4. SEARCH BY NAME
     # --------------------------------
 
     elif choice == "4":
+
+        print("\n========== SEARCH BY NAME ==========")
+
+        name = get_input("Enter Student Name: ")
+
+        students = search_by_name(name)
+
+        print("\nSearch Results:")
+
+        display_students(students)
+
+
+    # --------------------------------
+    # 5. UPDATE STUDENT
+    # --------------------------------
+
+    elif choice == "5":
 
         print("\n========== UPDATE STUDENT ==========")
 
@@ -241,10 +259,10 @@ while True:
 
 
     # --------------------------------
-    # 5. DELETE STUDENT
+    # 6. DELETE STUDENT
     # --------------------------------
 
-    elif choice == "5":
+    elif choice == "6":
 
         print("\n========== DELETE STUDENT ==========")
 
@@ -283,10 +301,10 @@ while True:
 
 
     # --------------------------------
-    # 6. STUDENT STATISTICS
+    # 7. STUDENT STATISTICS
     # --------------------------------
 
-    elif choice == "6":
+    elif choice == "7":
 
         print("\n========== STUDENT STATISTICS ==========")
 
@@ -313,10 +331,10 @@ while True:
 
 
     # --------------------------------
-    # 7. SEARCH BY DEPARTMENT
+    # 8. SEARCH BY DEPARTMENT
     # --------------------------------
 
-    elif choice == "7":
+    elif choice == "8":
 
         print("\n========== SEARCH BY DEPARTMENT ==========")
 
@@ -338,10 +356,10 @@ while True:
 
 
     # --------------------------------
-    # 8. EXIT
+    # 9. EXIT
     # --------------------------------
 
-    elif choice == "8":
+    elif choice == "9":
 
         print("\n========================================")
         print("Thank you for using Student Management System!")
@@ -359,4 +377,4 @@ while True:
 
         print("\nInvalid choice!")
 
-        print("Please enter a number from 1 to 8.")
+        print("Please enter a number from 1 to 9.")

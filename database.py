@@ -77,7 +77,7 @@ def view_students():
 
 
 # --------------------------------
-# SEARCH STUDENT
+# SEARCH BY ROLL NUMBER
 # --------------------------------
 
 def search_student(roll_no):
@@ -112,6 +112,29 @@ def search_by_department(department):
         WHERE LOWER(department) = LOWER(?)
         ORDER BY name ASC
     """, (department,))
+
+    students = cursor.fetchall()
+
+    connection.close()
+
+    return students
+
+
+# --------------------------------
+# SEARCH BY NAME
+# --------------------------------
+
+def search_by_name(name):
+
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id, name, roll_no, department, email
+        FROM students
+        WHERE LOWER(name) LIKE LOWER(?)
+        ORDER BY name ASC
+    """, ("%" + name + "%",))
 
     students = cursor.fetchall()
 
@@ -196,5 +219,8 @@ def get_statistics():
     return total_students, department_counts
 
 
-# Create database when program starts
+# --------------------------------
+# CREATE DATABASE
+# --------------------------------
+
 create_database()
