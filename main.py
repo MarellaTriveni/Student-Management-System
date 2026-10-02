@@ -6,6 +6,7 @@ from database import (
     search_student,
     search_by_department,
     search_by_name,
+    sort_students,
     update_student,
     delete_student,
     get_statistics
@@ -91,7 +92,8 @@ while True:
     print("6. Delete Student")
     print("7. Student Statistics")
     print("8. Search by Department")
-    print("9. Exit")
+    print("9. Sort Students")
+    print("10. Exit")
     print("==========================")
 
     choice = input("Enter your choice: ").strip()
@@ -356,10 +358,49 @@ while True:
 
 
     # --------------------------------
-    # 9. EXIT
+    # 9. SORT STUDENTS
     # --------------------------------
 
     elif choice == "9":
+
+        print("\n========== SORT STUDENTS ==========")
+
+        print("1. Sort by Name")
+        print("2. Sort by Roll Number")
+        print("3. Sort by Department")
+
+        sort_option = input(
+            "Enter your choice: "
+        ).strip()
+
+        students = sort_students(sort_option)
+
+        if sort_option == "1":
+
+            print("\nStudents sorted by Name:")
+
+        elif sort_option == "2":
+
+            print("\nStudents sorted by Roll Number:")
+
+        elif sort_option == "3":
+
+            print("\nStudents sorted by Department:")
+
+        else:
+
+            print("\nInvalid sorting option.")
+
+            continue
+
+        display_students(students)
+
+
+    # --------------------------------
+    # 10. EXIT
+    # --------------------------------
+
+    elif choice == "10":
 
         print("\n========================================")
         print("Thank you for using Student Management System!")
@@ -377,4 +418,4 @@ while True:
 
         print("\nInvalid choice!")
 
-        print("Please enter a number from 1 to 9.")
+        print("Please enter a number from 1 to 10.")

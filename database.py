@@ -144,6 +144,51 @@ def search_by_name(name):
 
 
 # --------------------------------
+# SORT STUDENTS
+# --------------------------------
+
+def sort_students(sort_option):
+
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    if sort_option == "1":
+
+        cursor.execute("""
+            SELECT id, name, roll_no, department, email
+            FROM students
+            ORDER BY name ASC
+        """)
+
+    elif sort_option == "2":
+
+        cursor.execute("""
+            SELECT id, name, roll_no, department, email
+            FROM students
+            ORDER BY CAST(roll_no AS INTEGER) ASC
+        """)
+
+    elif sort_option == "3":
+
+        cursor.execute("""
+            SELECT id, name, roll_no, department, email
+            FROM students
+            ORDER BY department ASC, name ASC
+        """)
+
+    else:
+
+        connection.close()
+        return []
+
+    students = cursor.fetchall()
+
+    connection.close()
+
+    return students
+
+
+# --------------------------------
 # UPDATE STUDENT
 # --------------------------------
 
