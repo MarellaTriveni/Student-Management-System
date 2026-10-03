@@ -1,4 +1,5 @@
 import sqlite3
+import csv
 
 
 # --------------------------------
@@ -55,7 +56,7 @@ def add_student(name, roll_no, department, email):
 
 
 # --------------------------------
-# VIEW ALL STUDENTS
+# VIEW STUDENTS
 # --------------------------------
 
 def view_students():
@@ -144,51 +145,6 @@ def search_by_name(name):
 
 
 # --------------------------------
-# SORT STUDENTS
-# --------------------------------
-
-def sort_students(sort_option):
-
-    connection = sqlite3.connect("student.db")
-    cursor = connection.cursor()
-
-    if sort_option == "1":
-
-        cursor.execute("""
-            SELECT id, name, roll_no, department, email
-            FROM students
-            ORDER BY name ASC
-        """)
-
-    elif sort_option == "2":
-
-        cursor.execute("""
-            SELECT id, name, roll_no, department, email
-            FROM students
-            ORDER BY CAST(roll_no AS INTEGER) ASC
-        """)
-
-    elif sort_option == "3":
-
-        cursor.execute("""
-            SELECT id, name, roll_no, department, email
-            FROM students
-            ORDER BY department ASC, name ASC
-        """)
-
-    else:
-
-        connection.close()
-        return []
-
-    students = cursor.fetchall()
-
-    connection.close()
-
-    return students
-
-
-# --------------------------------
 # UPDATE STUDENT
 # --------------------------------
 
@@ -262,6 +218,100 @@ def get_statistics():
     connection.close()
 
     return total_students, department_counts
+
+
+# --------------------------------
+# SORT STUDENTS
+# --------------------------------
+
+def sort_students(sort_option):
+
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    if sort_option == "1":
+
+        cursor.execute("""
+            SELECT id, name, roll_no, department, email
+            FROM students
+            ORDER BY name ASC
+        """)
+
+    elif sort_option == "2":
+
+        cursor.execute("""
+            SELECT id, name, roll_no, department, email
+            FROM students
+            ORDER BY CAST(roll_no AS INTEGER) ASC
+        """)
+
+    elif sort_option == "3":
+
+        cursor.execute("""
+            SELECT id, name, roll_no, department, email
+            FROM students
+            ORDER BY department ASC, name ASC
+        """)
+
+    else:
+
+        connection.close()
+        return []
+
+    students = cursor.fetchall()
+
+    connection.close()
+
+    return students
+
+
+# --------------------------------
+# DAY 15 - EXPORT STUDENTS TO CSV
+# --------------------------------
+
+def export_students_to_csv():
+
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id, name, roll_no, department, email
+        FROM students
+        ORDER BY name ASC
+    """)
+
+    students = cursor.fetchall()
+
+    connection.close()
+
+    # No students available
+    if not students:
+
+        return False
+
+    # Create CSV file
+    with open(
+        "students.csv",
+        "w",
+        newline="",
+        encoding="utf-8"
+    ) as file:
+
+        writer = csv.writer(file)
+
+        # CSV headings
+        writer.writerow([
+            "ID",
+            "Name",
+            "Roll No",
+            "Department",
+            "Email"
+        ])
+
+        # Student data
+        writer.writerows(students)
+
+    return True
 
 
 # --------------------------------

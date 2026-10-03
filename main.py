@@ -9,7 +9,8 @@ from database import (
     sort_students,
     update_student,
     delete_student,
-    get_statistics
+    get_statistics,
+    export_students_to_csv
 )
 
 
@@ -93,7 +94,8 @@ while True:
     print("7. Student Statistics")
     print("8. Search by Department")
     print("9. Sort Students")
-    print("10. Exit")
+    print("10. Export Students to CSV")
+    print("11. Exit")
     print("==========================")
 
     choice = input("Enter your choice: ").strip()
@@ -397,10 +399,30 @@ while True:
 
 
     # --------------------------------
-    # 10. EXIT
+    # 10. EXPORT TO CSV
     # --------------------------------
 
     elif choice == "10":
+
+        print("\n========== EXPORT STUDENTS ==========")
+
+        result = export_students_to_csv()
+
+        if result:
+
+            print("\nStudents exported successfully! ✅")
+            print("File created: students.csv")
+
+        else:
+
+            print("\nNo students available to export. ❌")
+
+
+    # --------------------------------
+    # 11. EXIT
+    # --------------------------------
+
+    elif choice == "11":
 
         print("\n========================================")
         print("Thank you for using Student Management System!")
@@ -418,4 +440,4 @@ while True:
 
         print("\nInvalid choice!")
 
-        print("Please enter a number from 1 to 10.")
+        print("Please enter a number from 1 to 11.")
