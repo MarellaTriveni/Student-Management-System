@@ -266,7 +266,7 @@ def sort_students(sort_option):
 
 
 # --------------------------------
-# DAY 15 - EXPORT STUDENTS TO CSV
+# DAY 15 - EXPORT TO CSV
 # --------------------------------
 
 def export_students_to_csv():
@@ -284,12 +284,10 @@ def export_students_to_csv():
 
     connection.close()
 
-    # No students available
     if not students:
 
         return False
 
-    # Create CSV file
     with open(
         "students.csv",
         "w",
@@ -299,7 +297,6 @@ def export_students_to_csv():
 
         writer = csv.writer(file)
 
-        # CSV headings
         writer.writerow([
             "ID",
             "Name",
@@ -308,10 +305,68 @@ def export_students_to_csv():
             "Email"
         ])
 
-        # Student data
         writer.writerows(students)
 
     return True
+
+
+# --------------------------------
+# DAY 16 - IMPORT FROM CSV
+# --------------------------------
+
+def import_students_from_csv():
+
+    try:
+
+        with open(
+            "students.csv",
+            "r",
+            newline="",
+            encoding="utf-8"
+        ) as file:
+
+            reader = csv.DictReader(file)
+
+            connection = sqlite3.connect("student.db")
+            cursor = connection.cursor()
+
+            imported_count = 0
+            skipped_count = 0
+
+            for row in reader:
+
+                name = row["Name"].strip()
+                roll_no = row["Roll No"].strip()
+                department = row["Department"].strip()
+                email = row["Email"].strip()
+
+                try:
+
+                    cursor.execute("""
+                        INSERT INTO students
+                        (name, roll_no, department, email)
+                        VALUES (?, ?, ?, ?)
+                    """, (
+                        name,
+                        roll_no,
+                        department,
+                        email
+                    ))
+
+                    imported_count += 1
+
+                except sqlite3.IntegrityError:
+
+                    skipped_count += 1
+
+            connection.commit()
+            connection.close()
+
+            return imported_count, skipped_count
+
+    except FileNotFoundError:
+
+        return -1, 0
 
 
 # --------------------------------
