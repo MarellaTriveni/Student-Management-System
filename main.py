@@ -15,7 +15,54 @@ from database import (
 )
 
 
-print("========================================")
+# ========================================
+# LOGIN SYSTEM - DAY 17
+# ========================================
+
+USERNAME = "admin"
+PASSWORD = "admin123"
+
+
+def login():
+
+    print("========================================")
+    print("        STUDENT MANAGEMENT SYSTEM")
+    print("              LOGIN")
+    print("========================================")
+
+    username = input("Enter Username: ").strip()
+    password = input("Enter Password: ").strip()
+
+    if username == USERNAME and password == PASSWORD:
+
+        print("\nLogin successful! ✅")
+
+        return True
+
+    else:
+
+        print("\nInvalid username or password! ❌")
+
+        return False
+
+
+# ========================================
+# CHECK LOGIN
+# ========================================
+
+if not login():
+
+    print("\nAccess denied.")
+    print("Program exited.")
+
+    exit()
+
+
+# ========================================
+# MAIN SYSTEM
+# ========================================
+
+print("\n========================================")
 print("      STUDENT MANAGEMENT SYSTEM")
 print("========================================")
 
@@ -33,7 +80,9 @@ def get_input(message):
         if value != "":
             return value
 
-        print("Input cannot be empty. Please try again.")
+        print(
+            "Input cannot be empty. Please try again."
+        )
 
 
 # --------------------------------
@@ -79,9 +128,9 @@ def display_students(students):
         print("----------------------------")
 
 
-# --------------------------------
+# ========================================
 # MAIN MENU
-# --------------------------------
+# ========================================
 
 while True:
 
@@ -113,13 +162,19 @@ while True:
 
         print("\n========== ADD STUDENT ==========")
 
-        name = get_input("Enter Student Name: ")
+        name = get_input(
+            "Enter Student Name: "
+        )
 
-        roll_no = get_input("Enter Roll Number: ")
+        roll_no = get_input(
+            "Enter Roll Number: "
+        )
 
         if not valid_roll_number(roll_no):
 
-            print("\nRoll Number must contain only numbers.")
+            print(
+                "\nRoll Number must contain only numbers."
+            )
 
             continue
 
@@ -135,7 +190,9 @@ while True:
 
             print("\nInvalid email format.")
 
-            print("Example: student@gmail.com")
+            print(
+                "Example: student@gmail.com"
+            )
 
             continue
 
@@ -148,11 +205,15 @@ while True:
 
         if result:
 
-            print("\nStudent added successfully! ✅")
+            print(
+                "\nStudent added successfully! ✅"
+            )
 
         else:
 
-            print("\nRoll Number already exists! ❌")
+            print(
+                "\nRoll Number already exists! ❌"
+            )
 
 
     # ========================================
@@ -161,7 +222,9 @@ while True:
 
     elif choice == "2":
 
-        print("\n========== ALL STUDENTS ==========")
+        print(
+            "\n========== ALL STUDENTS =========="
+        )
 
         students = view_students()
 
@@ -174,13 +237,17 @@ while True:
 
     elif choice == "3":
 
-        print("\n========== SEARCH STUDENT ==========")
+        print(
+            "\n========== SEARCH STUDENT =========="
+        )
 
         roll_no = get_input(
             "Enter Roll Number: "
         )
 
-        student = search_student(roll_no)
+        student = search_student(
+            roll_no
+        )
 
         if student:
 
@@ -194,7 +261,9 @@ while True:
 
         else:
 
-            print("\nStudent not found. ❌")
+            print(
+                "\nStudent not found. ❌"
+            )
 
 
     # ========================================
@@ -203,13 +272,17 @@ while True:
 
     elif choice == "4":
 
-        print("\n========== SEARCH BY NAME ==========")
+        print(
+            "\n========== SEARCH BY NAME =========="
+        )
 
         name = get_input(
             "Enter Student Name: "
         )
 
-        students = search_by_name(name)
+        students = search_by_name(
+            name
+        )
 
         display_students(students)
 
@@ -220,13 +293,17 @@ while True:
 
     elif choice == "5":
 
-        print("\n========== UPDATE STUDENT ==========")
+        print(
+            "\n========== UPDATE STUDENT =========="
+        )
 
         roll_no = get_input(
             "Enter Roll Number: "
         )
 
-        student = search_student(roll_no)
+        student = search_student(
+            roll_no
+        )
 
         if student:
 
@@ -253,7 +330,9 @@ while True:
 
             if not valid_email(email):
 
-                print("\nInvalid email format.")
+                print(
+                    "\nInvalid email format."
+                )
 
                 continue
 
@@ -278,7 +357,9 @@ while True:
 
         else:
 
-            print("\nStudent not found. ❌")
+            print(
+                "\nStudent not found. ❌"
+            )
 
 
     # ========================================
@@ -287,13 +368,17 @@ while True:
 
     elif choice == "6":
 
-        print("\n========== DELETE STUDENT ==========")
+        print(
+            "\n========== DELETE STUDENT =========="
+        )
 
         roll_no = get_input(
             "Enter Roll Number: "
         )
 
-        student = search_student(roll_no)
+        student = search_student(
+            roll_no
+        )
 
         if student:
 
@@ -322,11 +407,15 @@ while True:
 
             else:
 
-                print("\nDelete cancelled.")
+                print(
+                    "\nDelete cancelled."
+                )
 
         else:
 
-            print("\nStudent not found. ❌")
+            print(
+                "\nStudent not found. ❌"
+            )
 
 
     # ========================================
@@ -339,7 +428,9 @@ while True:
             "\n========== STUDENT STATISTICS =========="
         )
 
-        total_students, department_counts = get_statistics()
+        total_students, department_counts = (
+            get_statistics()
+        )
 
         print(
             "\nTotal Students:",
@@ -352,7 +443,9 @@ while True:
 
         if not department_counts:
 
-            print("No students available.")
+            print(
+                "No students available."
+            )
 
         else:
 
@@ -411,11 +504,15 @@ while True:
 
         if not students:
 
-            print("\nInvalid sorting option.")
+            print(
+                "\nInvalid sorting option."
+            )
 
         else:
 
-            print("\n========== SORTED STUDENTS ==========")
+            print(
+                "\n========== SORTED STUDENTS =========="
+            )
 
             display_students(students)
 
