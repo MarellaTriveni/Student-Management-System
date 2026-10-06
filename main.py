@@ -16,12 +16,16 @@ from database import (
 
 
 # ========================================
-# LOGIN SYSTEM - DAY 17
+# LOGIN DETAILS
 # ========================================
 
 USERNAME = "admin"
 PASSWORD = "admin123"
 
+
+# ========================================
+# LOGIN FUNCTION
+# ========================================
 
 def login():
 
@@ -47,7 +51,60 @@ def login():
 
 
 # ========================================
-# CHECK LOGIN
+# CHANGE PASSWORD
+# ========================================
+
+def change_password():
+
+    global PASSWORD
+
+    print("\n========== CHANGE PASSWORD ==========")
+
+    old_password = input(
+        "Enter Current Password: "
+    ).strip()
+
+    if old_password != PASSWORD:
+
+        print("\nCurrent password is incorrect! ❌")
+
+        return
+
+    new_password = input(
+        "Enter New Password: "
+    ).strip()
+
+    if new_password == "":
+
+        print("\nPassword cannot be empty! ❌")
+
+        return
+
+    if len(new_password) < 4:
+
+        print(
+            "\nPassword must contain at least 4 characters!"
+        )
+
+        return
+
+    confirm_password = input(
+        "Confirm New Password: "
+    ).strip()
+
+    if new_password != confirm_password:
+
+        print("\nPasswords do not match! ❌")
+
+        return
+
+    PASSWORD = new_password
+
+    print("\nPassword changed successfully! ✅")
+
+
+# ========================================
+# LOGIN CHECK
 # ========================================
 
 if not login():
@@ -147,7 +204,8 @@ while True:
     print("9. Sort Students")
     print("10. Export Students to CSV")
     print("11. Import Students from CSV")
-    print("12. Exit")
+    print("12. Change Password")
+    print("13. Exit")
 
     print("==========================")
 
@@ -588,10 +646,19 @@ while True:
 
 
     # ========================================
-    # 12. EXIT
+    # 12. CHANGE PASSWORD
     # ========================================
 
     elif choice == "12":
+
+        change_password()
+
+
+    # ========================================
+    # 13. EXIT
+    # ========================================
+
+    elif choice == "13":
 
         print(
             "\n========================================"
@@ -621,5 +688,5 @@ while True:
         print("\nInvalid choice!")
 
         print(
-            "Please enter a number from 1 to 12."
+            "Please enter a number from 1 to 13."
         )
