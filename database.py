@@ -2,15 +2,16 @@ import sqlite3
 import csv
 
 
-# --------------------------------
+# ========================================
 # CREATE DATABASE
-# --------------------------------
+# ========================================
 
 def create_database():
 
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
+    # Student table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,13 +22,95 @@ def create_database():
         )
     """)
 
+    # User login table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    """)
+
+    # Check whether admin user exists
+    cursor.execute(
+        "SELECT * FROM users WHERE username = ?",
+        ("admin",)
+    )
+
+    user = cursor.fetchone()
+
+    # Create default admin account
+    if user is None:
+
+        cursor.execute("""
+            INSERT INTO users (username, password)
+            VALUES (?, ?)
+        """, ("admin", "admin123"))
+
     connection.commit()
     connection.close()
 
 
-# --------------------------------
+# ========================================
+# LOGIN
+# ========================================
+
+def check_login(username, password):
+
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT * FROM users
+        WHERE username = ? AND password = ?
+    """, (username, password))
+
+    user = cursor.fetchone()
+
+    connection.close()
+
+    return user is not None
+
+
+# ========================================
+# CHANGE PASSWORD
+# ========================================
+
+def change_password(username, old_password, new_password):
+
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    # Check old password
+    cursor.execute("""
+        SELECT * FROM users
+        WHERE username = ? AND password = ?
+    """, (username, old_password))
+
+    user = cursor.fetchone()
+
+    if user is None:
+
+        connection.close()
+
+        return False
+
+    # Update password
+    cursor.execute("""
+        UPDATE users
+        SET password = ?
+        WHERE username = ?
+    """, (new_password, username))
+
+    connection.commit()
+    connection.close()
+
+    return True
+
+
+# ========================================
 # ADD STUDENT
-# --------------------------------
+# ========================================
 
 def add_student(name, roll_no, department, email):
 
@@ -55,9 +138,9 @@ def add_student(name, roll_no, department, email):
         connection.close()
 
 
-# --------------------------------
+# ========================================
 # VIEW STUDENTS
-# --------------------------------
+# ========================================
 
 def view_students():
 
@@ -77,9 +160,9 @@ def view_students():
     return students
 
 
-# --------------------------------
+# ========================================
 # SEARCH BY ROLL NUMBER
-# --------------------------------
+# ========================================
 
 def search_student(roll_no):
 
@@ -98,9 +181,9 @@ def search_student(roll_no):
     return student
 
 
-# --------------------------------
+# ========================================
 # SEARCH BY DEPARTMENT
-# --------------------------------
+# ========================================
 
 def search_by_department(department):
 
@@ -121,9 +204,9 @@ def search_by_department(department):
     return students
 
 
-# --------------------------------
+# ========================================
 # SEARCH BY NAME
-# --------------------------------
+# ========================================
 
 def search_by_name(name):
 
@@ -144,9 +227,9 @@ def search_by_name(name):
     return students
 
 
-# --------------------------------
+# ========================================
 # UPDATE STUDENT
-# --------------------------------
+# ========================================
 
 def update_student(roll_no, name, department, email):
 
@@ -170,9 +253,9 @@ def update_student(roll_no, name, department, email):
     return rows_updated
 
 
-# --------------------------------
+# ========================================
 # DELETE STUDENT
-# --------------------------------
+# ========================================
 
 def delete_student(roll_no):
 
@@ -193,16 +276,18 @@ def delete_student(roll_no):
     return rows_deleted
 
 
-# --------------------------------
+# ========================================
 # STUDENT STATISTICS
-# --------------------------------
+# ========================================
 
 def get_statistics():
 
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM students")
+    cursor.execute(
+        "SELECT COUNT(*) FROM students"
+    )
 
     total_students = cursor.fetchone()[0]
 
@@ -220,9 +305,9 @@ def get_statistics():
     return total_students, department_counts
 
 
-# --------------------------------
+# ========================================
 # SORT STUDENTS
-# --------------------------------
+# ========================================
 
 def sort_students(sort_option):
 
@@ -256,6 +341,7 @@ def sort_students(sort_option):
     else:
 
         connection.close()
+
         return []
 
     students = cursor.fetchall()
@@ -265,9 +351,9 @@ def sort_students(sort_option):
     return students
 
 
-# --------------------------------
-# DAY 15 - EXPORT TO CSV
-# --------------------------------
+# ========================================
+# EXPORT TO CSV
+# ========================================
 
 def export_students_to_csv():
 
@@ -310,9 +396,9 @@ def export_students_to_csv():
     return True
 
 
-# --------------------------------
-# DAY 16 - IMPORT FROM CSV
-# --------------------------------
+# ========================================
+# IMPORT FROM CSV
+# ========================================
 
 def import_students_from_csv():
 
@@ -369,8 +455,8 @@ def import_students_from_csv():
         return -1, 0
 
 
-# --------------------------------
+# ========================================
 # CREATE DATABASE
-# --------------------------------
+# ========================================
 
 create_database()

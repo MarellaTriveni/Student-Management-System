@@ -1,6 +1,8 @@
 import re
 
 from database import (
+    check_login,
+    change_password,
     add_student,
     view_students,
     search_student,
@@ -16,15 +18,7 @@ from database import (
 
 
 # ========================================
-# LOGIN DETAILS
-# ========================================
-
-USERNAME = "admin"
-PASSWORD = "admin123"
-
-
-# ========================================
-# LOGIN FUNCTION
+# LOGIN
 # ========================================
 
 def login():
@@ -34,41 +28,56 @@ def login():
     print("              LOGIN")
     print("========================================")
 
-    username = input("Enter Username: ").strip()
-    password = input("Enter Password: ").strip()
+    username = input(
+        "Enter Username: "
+    ).strip()
 
-    if username == USERNAME and password == PASSWORD:
+    password = input(
+        "Enter Password: "
+    ).strip()
+
+    if check_login(username, password):
 
         print("\nLogin successful! ✅")
 
-        return True
+        return username
 
     else:
 
-        print("\nInvalid username or password! ❌")
+        print(
+            "\nInvalid username or password! ❌"
+        )
 
-        return False
+        return None
+
+
+# ========================================
+# LOGIN CHECK
+# ========================================
+
+current_user = login()
+
+if current_user is None:
+
+    print("\nAccess denied.")
+    print("Program exited.")
+
+    exit()
 
 
 # ========================================
 # CHANGE PASSWORD
 # ========================================
 
-def change_password():
+def update_password():
 
-    global PASSWORD
-
-    print("\n========== CHANGE PASSWORD ==========")
+    print(
+        "\n========== CHANGE PASSWORD =========="
+    )
 
     old_password = input(
         "Enter Current Password: "
     ).strip()
-
-    if old_password != PASSWORD:
-
-        print("\nCurrent password is incorrect! ❌")
-
-        return
 
     new_password = input(
         "Enter New Password: "
@@ -76,14 +85,16 @@ def change_password():
 
     if new_password == "":
 
-        print("\nPassword cannot be empty! ❌")
+        print(
+            "\nPassword cannot be empty! ❌"
+        )
 
         return
 
     if len(new_password) < 4:
 
         print(
-            "\nPassword must contain at least 4 characters!"
+            "\nPassword must contain at least 4 characters! ❌"
         )
 
         return
@@ -94,25 +105,33 @@ def change_password():
 
     if new_password != confirm_password:
 
-        print("\nPasswords do not match! ❌")
+        print(
+            "\nPasswords do not match! ❌"
+        )
 
         return
 
-    PASSWORD = new_password
+    result = change_password(
+        current_user,
+        old_password,
+        new_password
+    )
 
-    print("\nPassword changed successfully! ✅")
+    if result:
 
+        print(
+            "\nPassword changed successfully! ✅"
+        )
 
-# ========================================
-# LOGIN CHECK
-# ========================================
+        print(
+            "New password is saved permanently."
+        )
 
-if not login():
+    else:
 
-    print("\nAccess denied.")
-    print("Program exited.")
-
-    exit()
+        print(
+            "\nCurrent password is incorrect! ❌"
+        )
 
 
 # ========================================
@@ -124,9 +143,9 @@ print("      STUDENT MANAGEMENT SYSTEM")
 print("========================================")
 
 
-# --------------------------------
-# GET REQUIRED INPUT
-# --------------------------------
+# ========================================
+# INPUT FUNCTION
+# ========================================
 
 def get_input(message):
 
@@ -142,29 +161,32 @@ def get_input(message):
         )
 
 
-# --------------------------------
-# VALIDATE EMAIL
-# --------------------------------
+# ========================================
+# EMAIL VALIDATION
+# ========================================
 
 def valid_email(email):
 
     pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
 
-    return re.match(pattern, email) is not None
+    return re.match(
+        pattern,
+        email
+    ) is not None
 
 
-# --------------------------------
-# VALIDATE ROLL NUMBER
-# --------------------------------
+# ========================================
+# ROLL NUMBER VALIDATION
+# ========================================
 
 def valid_roll_number(roll_no):
 
     return roll_no.isdigit()
 
 
-# --------------------------------
+# ========================================
 # DISPLAY STUDENTS
-# --------------------------------
+# ========================================
 
 def display_students(students):
 
@@ -209,7 +231,9 @@ while True:
 
     print("==========================")
 
-    choice = input("Enter your choice: ").strip()
+    choice = input(
+        "Enter your choice: "
+    ).strip()
 
 
     # ========================================
@@ -218,7 +242,9 @@ while True:
 
     if choice == "1":
 
-        print("\n========== ADD STUDENT ==========")
+        print(
+            "\n========== ADD STUDENT =========="
+        )
 
         name = get_input(
             "Enter Student Name: "
@@ -275,7 +301,7 @@ while True:
 
 
     # ========================================
-    # 2. VIEW ALL STUDENTS
+    # 2. VIEW STUDENTS
     # ========================================
 
     elif choice == "2":
@@ -477,7 +503,7 @@ while True:
 
 
     # ========================================
-    # 7. STUDENT STATISTICS
+    # 7. STATISTICS
     # ========================================
 
     elif choice == "7":
@@ -576,7 +602,7 @@ while True:
 
 
     # ========================================
-    # 10. EXPORT TO CSV
+    # 10. EXPORT CSV
     # ========================================
 
     elif choice == "10":
@@ -605,7 +631,7 @@ while True:
 
 
     # ========================================
-    # 11. IMPORT FROM CSV
+    # 11. IMPORT CSV
     # ========================================
 
     elif choice == "11":
@@ -622,10 +648,6 @@ while True:
 
             print(
                 "\nstudents.csv file not found. ❌"
-            )
-
-            print(
-                "Please create students.csv first."
             )
 
         else:
@@ -651,7 +673,7 @@ while True:
 
     elif choice == "12":
 
-        change_password()
+        update_password()
 
 
     # ========================================
