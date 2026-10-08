@@ -10,6 +10,7 @@ from database import (
     update_student,
     delete_student,
     get_statistics,
+    get_department_report,
     search_by_department,
     sort_students,
     export_students_to_csv,
@@ -123,24 +124,11 @@ def update_password():
             "\nPassword changed successfully! ✅"
         )
 
-        print(
-            "New password is saved permanently."
-        )
-
     else:
 
         print(
             "\nCurrent password is incorrect! ❌"
         )
-
-
-# ========================================
-# MAIN SYSTEM
-# ========================================
-
-print("\n========================================")
-print("      STUDENT MANAGEMENT SYSTEM")
-print("========================================")
 
 
 # ========================================
@@ -227,7 +215,8 @@ while True:
     print("10. Export Students to CSV")
     print("11. Import Students from CSV")
     print("12. Change Password")
-    print("13. Exit")
+    print("13. Department Report")
+    print("14. Exit")
 
     print("==========================")
 
@@ -272,10 +261,8 @@ while True:
 
         if not valid_email(email):
 
-            print("\nInvalid email format.")
-
             print(
-                "Example: student@gmail.com"
+                "\nInvalid email format."
             )
 
             continue
@@ -503,7 +490,7 @@ while True:
 
 
     # ========================================
-    # 7. STATISTICS
+    # 7. STUDENT STATISTICS
     # ========================================
 
     elif choice == "7":
@@ -677,10 +664,82 @@ while True:
 
 
     # ========================================
-    # 13. EXIT
+    # 13. DEPARTMENT REPORT
     # ========================================
 
     elif choice == "13":
+
+        print(
+            "\n========== DEPARTMENT REPORT =========="
+        )
+
+        (
+            total_students,
+            department_counts,
+            highest_department,
+            lowest_department,
+            average_students
+        ) = get_department_report()
+
+        if total_students == 0:
+
+            print(
+                "\nNo students available."
+            )
+
+        else:
+
+            print(
+                "\nTotal Students:",
+                total_students
+            )
+
+            print(
+                "\nDepartment Summary:"
+            )
+
+            for department, count in department_counts:
+
+                print(
+                    department,
+                    ":",
+                    count,
+                    "student(s)"
+                )
+
+            print(
+                "\nHighest Student Department:"
+            )
+
+            print(
+                highest_department[0],
+                "-",
+                highest_department[1],
+                "students"
+            )
+
+            print(
+                "\nLowest Student Department:"
+            )
+
+            print(
+                lowest_department[0],
+                "-",
+                lowest_department[1],
+                "students"
+            )
+
+            print(
+                "\nAverage Students per Department:",
+                round(average_students, 2)
+            )
+
+
+    # ========================================
+    # 14. EXIT
+    # ========================================
+
+    elif choice == "14":
 
         print(
             "\n========================================"
@@ -710,5 +769,5 @@ while True:
         print("\nInvalid choice!")
 
         print(
-            "Please enter a number from 1 to 13."
+            "Please enter a number from 1 to 14."
         )

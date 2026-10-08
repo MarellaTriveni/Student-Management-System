@@ -22,7 +22,7 @@ def create_database():
         )
     """)
 
-    # User login table
+    # User table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +31,7 @@ def create_database():
         )
     """)
 
-    # Check whether admin user exists
+    # Create default admin account
     cursor.execute(
         "SELECT * FROM users WHERE username = ?",
         ("admin",)
@@ -39,7 +39,6 @@ def create_database():
 
     user = cursor.fetchone()
 
-    # Create default admin account
     if user is None:
 
         cursor.execute("""
@@ -76,12 +75,15 @@ def check_login(username, password):
 # CHANGE PASSWORD
 # ========================================
 
-def change_password(username, old_password, new_password):
+def change_password(
+    username,
+    old_password,
+    new_password
+):
 
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
-    # Check old password
     cursor.execute("""
         SELECT * FROM users
         WHERE username = ? AND password = ?
@@ -95,7 +97,6 @@ def change_password(username, old_password, new_password):
 
         return False
 
-    # Update password
     cursor.execute("""
         UPDATE users
         SET password = ?
@@ -112,7 +113,12 @@ def change_password(username, old_password, new_password):
 # ADD STUDENT
 # ========================================
 
-def add_student(name, roll_no, department, email):
+def add_student(
+    name,
+    roll_no,
+    department,
+    email
+):
 
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -123,7 +129,12 @@ def add_student(name, roll_no, department, email):
             INSERT INTO students
             (name, roll_no, department, email)
             VALUES (?, ?, ?, ?)
-        """, (name, roll_no, department, email))
+        """, (
+            name,
+            roll_no,
+            department,
+            email
+        ))
 
         connection.commit()
 
@@ -231,7 +242,12 @@ def search_by_name(name):
 # UPDATE STUDENT
 # ========================================
 
-def update_student(roll_no, name, department, email):
+def update_student(
+    roll_no,
+    name,
+    department,
+    email
+):
 
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -242,7 +258,12 @@ def update_student(roll_no, name, department, email):
             department = ?,
             email = ?
         WHERE roll_no = ?
-    """, (name, department, email, roll_no))
+    """, (
+        name,
+        department,
+        email,
+        roll_no
+    ))
 
     connection.commit()
 
@@ -303,6 +324,66 @@ def get_statistics():
     connection.close()
 
     return total_students, department_counts
+
+
+# ========================================
+# DAY 20 - ADVANCED REPORT
+# ========================================
+
+def get_department_report():
+
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    # Total students
+    cursor.execute(
+        "SELECT COUNT(*) FROM students"
+    )
+
+    total_students = cursor.fetchone()[0]
+
+    # Department counts
+    cursor.execute("""
+        SELECT department, COUNT(*)
+        FROM students
+        GROUP BY department
+        ORDER BY COUNT(*) DESC
+    """)
+
+    department_counts = cursor.fetchall()
+
+    connection.close()
+
+    # No students
+    if not department_counts:
+
+        return (
+            total_students,
+            [],
+            None,
+            None,
+            0
+        )
+
+    # Highest department
+    highest_department = department_counts[0]
+
+    # Lowest department
+    lowest_department = department_counts[-1]
+
+    # Average students per department
+    average_students = (
+        total_students /
+        len(department_counts)
+    )
+
+    return (
+        total_students,
+        department_counts,
+        highest_department,
+        lowest_department,
+        average_students
+    )
 
 
 # ========================================
@@ -448,7 +529,10 @@ def import_students_from_csv():
             connection.commit()
             connection.close()
 
-            return imported_count, skipped_count
+            return (
+                imported_count,
+                skipped_count
+            )
 
     except FileNotFoundError:
 
