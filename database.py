@@ -2,16 +2,12 @@ import sqlite3
 import csv
 
 
-# ========================================
-# CREATE DATABASE
-# ========================================
-
+# Create database and tables
 def create_database():
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
-    # Student table
+    # Students table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,7 +18,7 @@ def create_database():
         )
     """)
 
-    # User table
+    # Users table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,7 +36,6 @@ def create_database():
     user = cursor.fetchone()
 
     if user is None:
-
         cursor.execute("""
             INSERT INTO users (username, password)
             VALUES (?, ?)
@@ -50,12 +45,8 @@ def create_database():
     connection.close()
 
 
-# ========================================
-# LOGIN
-# ========================================
-
+# Login check
 def check_login(username, password):
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -71,16 +62,8 @@ def check_login(username, password):
     return user is not None
 
 
-# ========================================
-# CHANGE PASSWORD
-# ========================================
-
-def change_password(
-    username,
-    old_password,
-    new_password
-):
-
+# Change password
+def change_password(username, old_password, new_password):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -92,9 +75,7 @@ def change_password(
     user = cursor.fetchone()
 
     if user is None:
-
         connection.close()
-
         return False
 
     cursor.execute("""
@@ -109,52 +90,30 @@ def change_password(
     return True
 
 
-# ========================================
-# ADD STUDENT
-# ========================================
-
-def add_student(
-    name,
-    roll_no,
-    department,
-    email
-):
-
+# Add student
+def add_student(name, roll_no, department, email):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
     try:
-
         cursor.execute("""
             INSERT INTO students
             (name, roll_no, department, email)
             VALUES (?, ?, ?, ?)
-        """, (
-            name,
-            roll_no,
-            department,
-            email
-        ))
+        """, (name, roll_no, department, email))
 
         connection.commit()
-
         return True
 
     except sqlite3.IntegrityError:
-
         return False
 
     finally:
-
         connection.close()
 
 
-# ========================================
-# VIEW STUDENTS
-# ========================================
-
+# View all students
 def view_students():
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -171,12 +130,8 @@ def view_students():
     return students
 
 
-# ========================================
-# SEARCH BY ROLL NUMBER
-# ========================================
-
+# Search student by roll number
 def search_student(roll_no):
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -192,12 +147,8 @@ def search_student(roll_no):
     return student
 
 
-# ========================================
-# SEARCH BY DEPARTMENT
-# ========================================
-
+# Search by department
 def search_by_department(department):
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -215,12 +166,8 @@ def search_by_department(department):
     return students
 
 
-# ========================================
-# SEARCH BY NAME
-# ========================================
-
+# Search by name
 def search_by_name(name):
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -238,17 +185,8 @@ def search_by_name(name):
     return students
 
 
-# ========================================
-# UPDATE STUDENT
-# ========================================
-
-def update_student(
-    roll_no,
-    name,
-    department,
-    email
-):
-
+# Update student
+def update_student(roll_no, name, department, email):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -258,12 +196,7 @@ def update_student(
             department = ?,
             email = ?
         WHERE roll_no = ?
-    """, (
-        name,
-        department,
-        email,
-        roll_no
-    ))
+    """, (name, department, email, roll_no))
 
     connection.commit()
 
@@ -274,12 +207,8 @@ def update_student(
     return rows_updated
 
 
-# ========================================
-# DELETE STUDENT
-# ========================================
-
+# Delete student
 def delete_student(roll_no):
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -297,18 +226,12 @@ def delete_student(roll_no):
     return rows_deleted
 
 
-# ========================================
-# STUDENT STATISTICS
-# ========================================
-
+# Student statistics
 def get_statistics():
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
-    cursor.execute(
-        "SELECT COUNT(*) FROM students"
-    )
+    cursor.execute("SELECT COUNT(*) FROM students")
 
     total_students = cursor.fetchone()[0]
 
@@ -326,23 +249,17 @@ def get_statistics():
     return total_students, department_counts
 
 
-# ========================================
-# DAY 20 - ADVANCED REPORT
-# ========================================
-
+# Day 20 - Department Report
 def get_department_report():
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
     # Total students
-    cursor.execute(
-        "SELECT COUNT(*) FROM students"
-    )
+    cursor.execute("SELECT COUNT(*) FROM students")
 
     total_students = cursor.fetchone()[0]
 
-    # Department counts
+    # Students in each department
     cursor.execute("""
         SELECT department, COUNT(*)
         FROM students
@@ -356,7 +273,6 @@ def get_department_report():
 
     # No students
     if not department_counts:
-
         return (
             total_students,
             [],
@@ -365,10 +281,10 @@ def get_department_report():
             0
         )
 
-    # Highest department
+    # Highest student department
     highest_department = department_counts[0]
 
-    # Lowest department
+    # Lowest student department
     lowest_department = department_counts[-1]
 
     # Average students per department
@@ -386,17 +302,14 @@ def get_department_report():
     )
 
 
-# ========================================
-# SORT STUDENTS
-# ========================================
-
+# Sort students
 def sort_students(sort_option):
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
     if sort_option == "1":
 
+        # Sort by name
         cursor.execute("""
             SELECT id, name, roll_no, department, email
             FROM students
@@ -405,6 +318,7 @@ def sort_students(sort_option):
 
     elif sort_option == "2":
 
+        # Sort by roll number
         cursor.execute("""
             SELECT id, name, roll_no, department, email
             FROM students
@@ -413,6 +327,7 @@ def sort_students(sort_option):
 
     elif sort_option == "3":
 
+        # Sort by department
         cursor.execute("""
             SELECT id, name, roll_no, department, email
             FROM students
@@ -420,9 +335,7 @@ def sort_students(sort_option):
         """)
 
     else:
-
         connection.close()
-
         return []
 
     students = cursor.fetchall()
@@ -432,12 +345,8 @@ def sort_students(sort_option):
     return students
 
 
-# ========================================
-# EXPORT TO CSV
-# ========================================
-
+# Export students to CSV
 def export_students_to_csv():
-
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
@@ -452,7 +361,6 @@ def export_students_to_csv():
     connection.close()
 
     if not students:
-
         return False
 
     with open(
@@ -477,14 +385,10 @@ def export_students_to_csv():
     return True
 
 
-# ========================================
-# IMPORT FROM CSV
-# ========================================
-
+# Import students from CSV
 def import_students_from_csv():
 
     try:
-
         with open(
             "students.csv",
             "r",
@@ -539,8 +443,5 @@ def import_students_from_csv():
         return -1, 0
 
 
-# ========================================
-# CREATE DATABASE
-# ========================================
-
+# Create database
 create_database()
