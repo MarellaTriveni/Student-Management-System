@@ -1,13 +1,27 @@
+
 import sqlite3
 import csv
+import hashlib
 
 
-# Create database and tables
+# =====================================
+# DAY 21: PASSWORD HASHING
+# =====================================
+
+def hash_password(password):
+    return hashlib.sha256(
+        password.encode("utf-8")
+    ).hexdigest()
+
+
+# =====================================
+# CREATE DATABASE
+# =====================================
+
 def create_database():
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
-    # Students table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS students (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,7 +32,6 @@ def create_database():
         )
     """)
 
-    # Users table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,50 +40,86 @@ def create_database():
         )
     """)
 
-    # Create default admin account
     cursor.execute(
-        "SELECT * FROM users WHERE username = ?",
+        "SELECT id FROM users WHERE username = ?",
         ("admin",)
     )
 
-    user = cursor.fetchone()
-
-    if user is None:
+    if cursor.fetchone() is None:
         cursor.execute("""
             INSERT INTO users (username, password)
             VALUES (?, ?)
-        """, ("admin", "admin123"))
+        """, ("admin", hash_password("admin123")))
 
     connection.commit()
     connection.close()
 
 
-# Login check
+# =====================================
+# MIGRATE OLD PASSWORDS
+# =====================================
+
+def migrate_existing_passwords():
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT id, password FROM users")
+    users = cursor.fetchall()
+
+    for user_id, password in users:
+        is_sha256 = (
+            len(password) == 64
+            and all(
+                character in "0123456789abcdefABCDEF"
+                for character in password
+            )
+        )
+
+        if not is_sha256:
+            cursor.execute("""
+                UPDATE users
+                SET password = ?
+                WHERE id = ?
+            """, (hash_password(password), user_id))
+
+    connection.commit()
+    connection.close()
+
+
+# =====================================
+# LOGIN
+# =====================================
+
 def check_login(username, password):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT * FROM users
-        WHERE username = ? AND password = ?
-    """, (username, password))
+        SELECT password FROM users
+        WHERE username = ?
+    """, (username,))
 
     user = cursor.fetchone()
-
     connection.close()
 
-    return user is not None
+    if user is None:
+        return False
+
+    return user[0] == hash_password(password)
 
 
-# Change password
+# =====================================
+# CHANGE PASSWORD
+# =====================================
+
 def change_password(username, old_password, new_password):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT * FROM users
-        WHERE username = ? AND password = ?
-    """, (username, old_password))
+        SELECT password FROM users
+        WHERE username = ?
+    """, (username,))
 
     user = cursor.fetchone()
 
@@ -78,19 +127,25 @@ def change_password(username, old_password, new_password):
         connection.close()
         return False
 
+    if user[0] != hash_password(old_password):
+        connection.close()
+        return False
+
     cursor.execute("""
         UPDATE users
         SET password = ?
         WHERE username = ?
-    """, (new_password, username))
+    """, (hash_password(new_password), username))
 
     connection.commit()
     connection.close()
-
     return True
 
 
-# Add student
+# =====================================
+# ADD STUDENT
+# =====================================
+
 def add_student(name, roll_no, department, email):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -112,7 +167,10 @@ def add_student(name, roll_no, department, email):
         connection.close()
 
 
-# View all students
+# =====================================
+# VIEW STUDENTS
+# =====================================
+
 def view_students():
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -124,30 +182,32 @@ def view_students():
     """)
 
     students = cursor.fetchall()
-
     connection.close()
-
     return students
 
 
-# Search student by roll number
+# =====================================
+# SEARCH BY ROLL NUMBER
+# =====================================
+
 def search_student(roll_no):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
-    cursor.execute(
-        "SELECT * FROM students WHERE roll_no = ?",
-        (roll_no,)
-    )
+    cursor.execute("""
+        SELECT * FROM students
+        WHERE roll_no = ?
+    """, (roll_no,))
 
     student = cursor.fetchone()
-
     connection.close()
-
     return student
 
 
-# Search by department
+# =====================================
+# SEARCH BY DEPARTMENT
+# =====================================
+
 def search_by_department(department):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -160,13 +220,14 @@ def search_by_department(department):
     """, (department,))
 
     students = cursor.fetchall()
-
     connection.close()
-
     return students
 
 
-# Search by name
+# =====================================
+# SEARCH BY NAME
+# =====================================
+
 def search_by_name(name):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -179,13 +240,14 @@ def search_by_name(name):
     """, ("%" + name + "%",))
 
     students = cursor.fetchall()
-
     connection.close()
-
     return students
 
 
-# Update student
+# =====================================
+# UPDATE STUDENT
+# =====================================
+
 def update_student(roll_no, name, department, email):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -199,40 +261,39 @@ def update_student(roll_no, name, department, email):
     """, (name, department, email, roll_no))
 
     connection.commit()
-
     rows_updated = cursor.rowcount
-
     connection.close()
-
     return rows_updated
 
 
-# Delete student
+# =====================================
+# DELETE STUDENT
+# =====================================
+
 def delete_student(roll_no):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
-    cursor.execute(
-        "DELETE FROM students WHERE roll_no = ?",
-        (roll_no,)
-    )
+    cursor.execute("""
+        DELETE FROM students
+        WHERE roll_no = ?
+    """, (roll_no,))
 
     connection.commit()
-
     rows_deleted = cursor.rowcount
-
     connection.close()
-
     return rows_deleted
 
 
-# Student statistics
+# =====================================
+# STUDENT STATISTICS
+# =====================================
+
 def get_statistics():
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
     cursor.execute("SELECT COUNT(*) FROM students")
-
     total_students = cursor.fetchone()[0]
 
     cursor.execute("""
@@ -243,73 +304,76 @@ def get_statistics():
     """)
 
     department_counts = cursor.fetchall()
-
     connection.close()
 
     return total_students, department_counts
 
 
-# Day 20 - Department Report
+# =====================================
+# DAY 20: DEPARTMENT REPORT
+# =====================================
+
 def get_department_report():
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
-    # Total students
     cursor.execute("SELECT COUNT(*) FROM students")
-
     total_students = cursor.fetchone()[0]
 
-    # Students in each department
     cursor.execute("""
         SELECT department, COUNT(*)
         FROM students
         GROUP BY department
-        ORDER BY COUNT(*) DESC
+        ORDER BY department ASC
     """)
 
     department_counts = cursor.fetchall()
-
     connection.close()
 
-    # No students
     if not department_counts:
-        return (
-            total_students,
-            [],
-            None,
-            None,
-            0
-        )
+        return total_students, [], [], [], 0
 
-    # Highest student department
-    highest_department = department_counts[0]
+    highest_count = max(
+        count for _, count in department_counts
+    )
+    lowest_count = min(
+        count for _, count in department_counts
+    )
 
-    # Lowest student department
-    lowest_department = department_counts[-1]
+    highest_departments = [
+        (department, count)
+        for department, count in department_counts
+        if count == highest_count
+    ]
 
-    # Average students per department
+    lowest_departments = [
+        (department, count)
+        for department, count in department_counts
+        if count == lowest_count
+    ]
+
     average_students = (
-        total_students /
-        len(department_counts)
+        total_students / len(department_counts)
     )
 
     return (
         total_students,
         department_counts,
-        highest_department,
-        lowest_department,
+        highest_departments,
+        lowest_departments,
         average_students
     )
 
 
-# Sort students
+# =====================================
+# SORT STUDENTS
+# =====================================
+
 def sort_students(sort_option):
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
 
     if sort_option == "1":
-
-        # Sort by name
         cursor.execute("""
             SELECT id, name, roll_no, department, email
             FROM students
@@ -317,8 +381,6 @@ def sort_students(sort_option):
         """)
 
     elif sort_option == "2":
-
-        # Sort by roll number
         cursor.execute("""
             SELECT id, name, roll_no, department, email
             FROM students
@@ -326,8 +388,6 @@ def sort_students(sort_option):
         """)
 
     elif sort_option == "3":
-
-        # Sort by department
         cursor.execute("""
             SELECT id, name, roll_no, department, email
             FROM students
@@ -336,16 +396,17 @@ def sort_students(sort_option):
 
     else:
         connection.close()
-        return []
+        return None
 
     students = cursor.fetchall()
-
     connection.close()
-
     return students
 
 
-# Export students to CSV
+# =====================================
+# EXPORT STUDENTS TO CSV
+# =====================================
+
 def export_students_to_csv():
     connection = sqlite3.connect("student.db")
     cursor = connection.cursor()
@@ -357,7 +418,6 @@ def export_students_to_csv():
     """)
 
     students = cursor.fetchall()
-
     connection.close()
 
     if not students:
@@ -369,15 +429,11 @@ def export_students_to_csv():
         newline="",
         encoding="utf-8"
     ) as file:
-
         writer = csv.writer(file)
 
         writer.writerow([
-            "ID",
-            "Name",
-            "Roll No",
-            "Department",
-            "Email"
+            "ID", "Name", "Roll No",
+            "Department", "Email"
         ])
 
         writer.writerows(students)
@@ -385,9 +441,11 @@ def export_students_to_csv():
     return True
 
 
-# Import students from CSV
-def import_students_from_csv():
+# =====================================
+# IMPORT STUDENTS FROM CSV
+# =====================================
 
+def import_students_from_csv():
     try:
         with open(
             "students.csv",
@@ -395,8 +453,16 @@ def import_students_from_csv():
             newline="",
             encoding="utf-8"
         ) as file:
-
             reader = csv.DictReader(file)
+
+            required_columns = {
+                "Name", "Roll No", "Department", "Email"
+            }
+
+            if not reader.fieldnames or not required_columns.issubset(
+                reader.fieldnames
+            ):
+                return -2, 0
 
             connection = sqlite3.connect("student.db")
             cursor = connection.cursor()
@@ -404,44 +470,47 @@ def import_students_from_csv():
             imported_count = 0
             skipped_count = 0
 
-            for row in reader:
+            try:
+                for row in reader:
+                    name = (row.get("Name") or "").strip()
+                    roll_no = (row.get("Roll No") or "").strip()
+                    department = (
+                        row.get("Department") or ""
+                    ).strip()
+                    email = (row.get("Email") or "").strip()
 
-                name = row["Name"].strip()
-                roll_no = row["Roll No"].strip()
-                department = row["Department"].strip()
-                email = row["Email"].strip()
+                    if not all([name, roll_no, department, email]):
+                        skipped_count += 1
+                        continue
 
-                try:
+                    try:
+                        cursor.execute("""
+                            INSERT INTO students
+                            (name, roll_no, department, email)
+                            VALUES (?, ?, ?, ?)
+                        """, (
+                            name, roll_no, department, email
+                        ))
 
-                    cursor.execute("""
-                        INSERT INTO students
-                        (name, roll_no, department, email)
-                        VALUES (?, ?, ?, ?)
-                    """, (
-                        name,
-                        roll_no,
-                        department,
-                        email
-                    ))
+                        imported_count += 1
 
-                    imported_count += 1
+                    except sqlite3.IntegrityError:
+                        skipped_count += 1
 
-                except sqlite3.IntegrityError:
+                connection.commit()
 
-                    skipped_count += 1
+            finally:
+                connection.close()
 
-            connection.commit()
-            connection.close()
-
-            return (
-                imported_count,
-                skipped_count
-            )
+            return imported_count, skipped_count
 
     except FileNotFoundError:
-
         return -1, 0
 
 
-# Create database
+# =====================================
+# INITIALIZE DATABASE
+# =====================================
+
 create_database()
+migrate_existing_passwords()
