@@ -9,6 +9,7 @@ from database import (
     search_student,
     search_by_department,
     search_by_name,
+    search_by_email,
     update_student,
     delete_student,
     get_statistics,
@@ -191,7 +192,7 @@ def show_department_report():
 
 
 # =====================================
-# MAIN MENU
+# MAIN PROGRAM
 # =====================================
 
 def main():
@@ -218,7 +219,8 @@ def main():
         print("11. Import Students from CSV")
         print("12. Change Password")
         print("13. Department Report")
-        print("14. Exit")
+        print("14. Search Student by Email")
+        print("15. Exit")
 
         print("=" * 45)
 
@@ -275,8 +277,6 @@ def main():
                 print("Student not found.")
                 continue
 
-            print("Enter the updated details.")
-
             name = get_input("Enter new name: ")
             department = get_input("Enter new department: ")
             email = get_input("Enter new email: ")
@@ -315,7 +315,7 @@ def main():
             else:
                 print("Delete cancelled.")
 
-        # STATISTICS
+        # STUDENT STATISTICS
         elif choice == "7":
             total, departments = get_statistics()
 
@@ -332,8 +332,9 @@ def main():
         # SEARCH BY DEPARTMENT
         elif choice == "8":
             department = get_input("Enter department: ")
-            students = search_by_department(department)
-            display_students(students)
+            display_students(
+                search_by_department(department)
+            )
 
         # SORT STUDENTS
         elif choice == "9":
@@ -379,13 +380,31 @@ def main():
         elif choice == "13":
             show_department_report()
 
-        # EXIT
+        # DAY 22: SEARCH BY EMAIL
         elif choice == "14":
-            print("Thank you for using Student Management System!")
+            email = get_input("Enter student email: ")
+
+            if not valid_email(email):
+                print("Please enter a valid email address.")
+                continue
+
+            student = search_by_email(email)
+
+            if student:
+                print("\nStudent found!")
+                display_students([student])
+            else:
+                print("No student found with this email.")
+
+        # EXIT
+        elif choice == "15":
+            print(
+                "Thank you for using Student Management System!"
+            )
             break
 
         else:
-            print("Invalid choice. Enter a number from 1 to 14.")
+            print("Invalid choice. Enter a number from 1 to 15.")
 
 
 # =====================================

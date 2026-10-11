@@ -5,7 +5,7 @@ import hashlib
 
 
 # =====================================
-# DAY 21: PASSWORD HASHING
+# PASSWORD HASHING
 # =====================================
 
 def hash_password(password):
@@ -56,7 +56,7 @@ def create_database():
 
 
 # =====================================
-# MIGRATE OLD PASSWORDS
+# MIGRATE EXISTING PASSWORDS
 # =====================================
 
 def migrate_existing_passwords():
@@ -195,7 +195,8 @@ def search_student(roll_no):
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT * FROM students
+        SELECT id, name, roll_no, department, email
+        FROM students
         WHERE roll_no = ?
     """, (roll_no,))
 
@@ -242,6 +243,25 @@ def search_by_name(name):
     students = cursor.fetchall()
     connection.close()
     return students
+
+
+# =====================================
+# DAY 22: SEARCH BY EMAIL
+# =====================================
+
+def search_by_email(email):
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id, name, roll_no, department, email
+        FROM students
+        WHERE LOWER(email) = LOWER(?)
+    """, (email.strip(),))
+
+    student = cursor.fetchone()
+    connection.close()
+    return student
 
 
 # =====================================
@@ -305,12 +325,11 @@ def get_statistics():
 
     department_counts = cursor.fetchall()
     connection.close()
-
     return total_students, department_counts
 
 
 # =====================================
-# DAY 20: DEPARTMENT REPORT
+# DEPARTMENT REPORT
 # =====================================
 
 def get_department_report():
@@ -404,7 +423,7 @@ def sort_students(sort_option):
 
 
 # =====================================
-# EXPORT STUDENTS TO CSV
+# EXPORT TO CSV
 # =====================================
 
 def export_students_to_csv():
@@ -442,7 +461,7 @@ def export_students_to_csv():
 
 
 # =====================================
-# IMPORT STUDENTS FROM CSV
+# IMPORT FROM CSV
 # =====================================
 
 def import_students_from_csv():
@@ -459,8 +478,9 @@ def import_students_from_csv():
                 "Name", "Roll No", "Department", "Email"
             }
 
-            if not reader.fieldnames or not required_columns.issubset(
-                reader.fieldnames
+            if (
+                not reader.fieldnames
+                or not required_columns.issubset(reader.fieldnames)
             ):
                 return -2, 0
 
@@ -479,7 +499,9 @@ def import_students_from_csv():
                     ).strip()
                     email = (row.get("Email") or "").strip()
 
-                    if not all([name, roll_no, department, email]):
+                    if not all([
+                        name, roll_no, department, email
+                    ]):
                         skipped_count += 1
                         continue
 
