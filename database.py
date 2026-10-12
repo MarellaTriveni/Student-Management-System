@@ -95,7 +95,8 @@ def check_login(username, password):
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT password FROM users
+        SELECT password
+        FROM users
         WHERE username = ?
     """, (username,))
 
@@ -117,7 +118,8 @@ def change_password(username, old_password, new_password):
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT password FROM users
+        SELECT password
+        FROM users
         WHERE username = ?
     """, (username,))
 
@@ -265,6 +267,28 @@ def search_by_email(email):
 
 
 # =====================================
+# DAY 23: SEARCH BY ROLL NUMBER RANGE
+# =====================================
+
+def search_by_roll_range(start_roll, end_roll):
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT id, name, roll_no, department, email
+        FROM students
+        WHERE roll_no GLOB '[0-9]*'
+          AND roll_no NOT GLOB '*[^0-9]*'
+          AND CAST(roll_no AS INTEGER) BETWEEN ? AND ?
+        ORDER BY CAST(roll_no AS INTEGER) ASC
+    """, (start_roll, end_roll))
+
+    students = cursor.fetchall()
+    connection.close()
+    return students
+
+
+# =====================================
 # UPDATE STUDENT
 # =====================================
 
@@ -325,6 +349,7 @@ def get_statistics():
 
     department_counts = cursor.fetchall()
     connection.close()
+
     return total_students, department_counts
 
 
@@ -451,8 +476,7 @@ def export_students_to_csv():
         writer = csv.writer(file)
 
         writer.writerow([
-            "ID", "Name", "Roll No",
-            "Department", "Email"
+            "ID", "Name", "Roll No", "Department", "Email"
         ])
 
         writer.writerows(students)

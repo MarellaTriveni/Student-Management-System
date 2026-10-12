@@ -10,6 +10,7 @@ from database import (
     search_by_department,
     search_by_name,
     search_by_email,
+    search_by_roll_range,
     update_student,
     delete_student,
     get_statistics,
@@ -52,26 +53,26 @@ def display_students(students):
         print("\nNo students found.")
         return
 
-    print("\n" + "=" * 85)
+    print("\n" + "=" * 100)
     print(
         f"{'ID':<5}"
         f"{'Name':<20}"
-        f"{'Roll No':<12}"
+        f"{'Roll No':<15}"
         f"{'Department':<15}"
-        f"{'Email':<33}"
+        f"{'Email':<40}"
     )
-    print("=" * 85)
+    print("=" * 100)
 
     for student in students:
         print(
             f"{student[0]:<5}"
             f"{student[1][:19]:<20}"
-            f"{student[2]:<12}"
+            f"{student[2][:14]:<15}"
             f"{student[3][:14]:<15}"
-            f"{student[4][:32]:<33}"
+            f"{student[4][:39]:<40}"
         )
 
-    print("=" * 85)
+    print("=" * 100)
 
 
 # =====================================
@@ -133,13 +134,9 @@ def update_password(username):
         print("Passwords do not match.")
         return
 
-    result = change_password(
-        username,
-        old_password,
-        new_password
-    )
-
-    if result:
+    if change_password(
+        username, old_password, new_password
+    ):
         print("Password changed successfully!")
     else:
         print("Current password is incorrect.")
@@ -150,9 +147,7 @@ def update_password(username):
 # =====================================
 
 def show_department_report():
-    print("\n" + "=" * 50)
-    print("          DEPARTMENT REPORT")
-    print("=" * 50)
+    print("\n--- Department Report ---")
 
     (
         total_students,
@@ -162,33 +157,31 @@ def show_department_report():
         average_students
     ) = get_department_report()
 
-    print(f"\nTotal Students: {total_students}")
+    print(f"Total Students: {total_students}")
 
     if not department_counts:
         print("No department data available.")
         return
 
-    print("\nDepartment Summary:")
+    print("\nDepartment-wise Count:")
 
     for department, count in department_counts:
         print(f"{department}: {count} students")
 
-    print("\nHighest Student Department(s):")
+    print("\nDepartment(s) with the most students:")
 
     for department, count in highest_departments:
         print(f"{department}: {count} students")
 
-    print("\nLowest Student Department(s):")
+    print("\nDepartment(s) with the fewest students:")
 
     for department, count in lowest_departments:
         print(f"{department}: {count} students")
 
     print(
-        f"\nAverage Students per Department: "
+        f"\nAverage students per department: "
         f"{average_students:.1f}"
     )
-
-    print("=" * 50)
 
 
 # =====================================
@@ -208,8 +201,8 @@ def main():
 
         print("1. Add Student")
         print("2. View All Students")
-        print("3. Search Student by Roll Number")
-        print("4. Search Student by Name")
+        print("3. Search by Roll Number")
+        print("4. Search by Name")
         print("5. Update Student")
         print("6. Delete Student")
         print("7. Student Statistics")
@@ -220,13 +213,14 @@ def main():
         print("12. Change Password")
         print("13. Department Report")
         print("14. Search Student by Email")
-        print("15. Exit")
+        print("15. Search Students by Roll Number Range")
+        print("16. Exit")
 
         print("=" * 45)
 
         choice = input("Enter your choice: ").strip()
 
-        # ADD STUDENT
+        # 1. ADD STUDENT
         if choice == "1":
             print("\n--- Add Student ---")
 
@@ -249,11 +243,11 @@ def main():
             else:
                 print("This roll number already exists.")
 
-        # VIEW STUDENTS
+        # 2. VIEW ALL STUDENTS
         elif choice == "2":
             display_students(view_students())
 
-        # SEARCH BY ROLL NUMBER
+        # 3. SEARCH BY ROLL NUMBER
         elif choice == "3":
             roll_no = get_input("Enter roll number: ")
             student = search_student(roll_no)
@@ -263,14 +257,14 @@ def main():
             else:
                 print("Student not found.")
 
-        # SEARCH BY NAME
+        # 4. SEARCH BY NAME
         elif choice == "4":
             name = get_input("Enter student name: ")
             display_students(search_by_name(name))
 
-        # UPDATE STUDENT
+        # 5. UPDATE STUDENT
         elif choice == "5":
-            roll_no = get_input("Enter roll number: ")
+            roll_no = get_input("Enter roll number to update: ")
             student = search_student(roll_no)
 
             if not student:
@@ -294,9 +288,9 @@ def main():
             else:
                 print("No changes were made.")
 
-        # DELETE STUDENT
+        # 6. DELETE STUDENT
         elif choice == "6":
-            roll_no = get_input("Enter roll number: ")
+            roll_no = get_input("Enter roll number to delete: ")
             student = search_student(roll_no)
 
             if not student:
@@ -315,7 +309,7 @@ def main():
             else:
                 print("Delete cancelled.")
 
-        # STUDENT STATISTICS
+        # 7. STUDENT STATISTICS
         elif choice == "7":
             total, departments = get_statistics()
 
@@ -329,14 +323,14 @@ def main():
             else:
                 print("No student records available.")
 
-        # SEARCH BY DEPARTMENT
+        # 8. SEARCH BY DEPARTMENT
         elif choice == "8":
             department = get_input("Enter department: ")
             display_students(
                 search_by_department(department)
             )
 
-        # SORT STUDENTS
+        # 9. SORT STUDENTS
         elif choice == "9":
             print("\n1. Sort by Name")
             print("2. Sort by Roll Number")
@@ -353,14 +347,14 @@ def main():
             else:
                 display_students(students)
 
-        # EXPORT CSV
+        # 10. EXPORT TO CSV
         elif choice == "10":
             if export_students_to_csv():
                 print("Students exported to students.csv")
             else:
                 print("No students available to export.")
 
-        # IMPORT CSV
+        # 11. IMPORT FROM CSV
         elif choice == "11":
             imported, skipped = import_students_from_csv()
 
@@ -372,15 +366,15 @@ def main():
                 print(f"Students imported: {imported}")
                 print(f"Rows skipped: {skipped}")
 
-        # CHANGE PASSWORD
+        # 12. CHANGE PASSWORD
         elif choice == "12":
             update_password(current_user)
 
-        # DEPARTMENT REPORT
+        # 13. DEPARTMENT REPORT
         elif choice == "13":
             show_department_report()
 
-        # DAY 22: SEARCH BY EMAIL
+        # 14. SEARCH BY EMAIL
         elif choice == "14":
             email = get_input("Enter student email: ")
 
@@ -396,15 +390,50 @@ def main():
             else:
                 print("No student found with this email.")
 
-        # EXIT
+        # 15. DAY 23: SEARCH BY ROLL NUMBER RANGE
         elif choice == "15":
+            try:
+                start_roll = int(
+                    get_input("Enter starting roll number: ")
+                )
+
+                end_roll = int(
+                    get_input("Enter ending roll number: ")
+                )
+
+                if start_roll < 0 or end_roll < 0:
+                    print("Roll numbers cannot be negative.")
+
+                elif start_roll > end_roll:
+                    print(
+                        "Starting roll number must be "
+                        "less than or equal to ending roll number."
+                    )
+
+                else:
+                    students = search_by_roll_range(
+                        start_roll, end_roll
+                    )
+
+                    print(
+                        f"\nStudents with roll numbers "
+                        f"between {start_roll} and {end_roll}:"
+                    )
+
+                    display_students(students)
+
+            except ValueError:
+                print("Please enter valid numeric roll numbers.")
+
+        # 16. EXIT
+        elif choice == "16":
             print(
                 "Thank you for using Student Management System!"
             )
             break
 
         else:
-            print("Invalid choice. Enter a number from 1 to 15.")
+            print("Invalid choice. Enter a number from 1 to 16.")
 
 
 # =====================================
