@@ -95,8 +95,7 @@ def check_login(username, password):
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT password
-        FROM users
+        SELECT password FROM users
         WHERE username = ?
     """, (username,))
 
@@ -118,8 +117,7 @@ def change_password(username, old_password, new_password):
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT password
-        FROM users
+        SELECT password FROM users
         WHERE username = ?
     """, (username,))
 
@@ -248,7 +246,7 @@ def search_by_name(name):
 
 
 # =====================================
-# DAY 22: SEARCH BY EMAIL
+# SEARCH BY EMAIL
 # =====================================
 
 def search_by_email(email):
@@ -277,11 +275,33 @@ def search_by_roll_range(start_roll, end_roll):
     cursor.execute("""
         SELECT id, name, roll_no, department, email
         FROM students
-        WHERE roll_no GLOB '[0-9]*'
-          AND roll_no NOT GLOB '*[^0-9]*'
+        WHERE roll_no NOT GLOB '*[^0-9]*'
+          AND roll_no != ''
           AND CAST(roll_no AS INTEGER) BETWEEN ? AND ?
         ORDER BY CAST(roll_no AS INTEGER) ASC
     """, (start_roll, end_roll))
+
+    students = cursor.fetchall()
+    connection.close()
+    return students
+
+
+# =====================================
+# DAY 24: SEARCH BY EMAIL DOMAIN
+# =====================================
+
+def search_by_email_domain(domain):
+    connection = sqlite3.connect("student.db")
+    cursor = connection.cursor()
+
+    domain = domain.strip().lower().lstrip("@")
+
+    cursor.execute("""
+        SELECT id, name, roll_no, department, email
+        FROM students
+        WHERE LOWER(email) LIKE ?
+        ORDER BY name ASC
+    """, ("%@" + domain,))
 
     students = cursor.fetchall()
     connection.close()
@@ -298,9 +318,7 @@ def update_student(roll_no, name, department, email):
 
     cursor.execute("""
         UPDATE students
-        SET name = ?,
-            department = ?,
-            email = ?
+        SET name = ?, department = ?, email = ?
         WHERE roll_no = ?
     """, (name, department, email, roll_no))
 
@@ -319,8 +337,7 @@ def delete_student(roll_no):
     cursor = connection.cursor()
 
     cursor.execute("""
-        DELETE FROM students
-        WHERE roll_no = ?
+        DELETE FROM students WHERE roll_no = ?
     """, (roll_no,))
 
     connection.commit()
@@ -377,12 +394,8 @@ def get_department_report():
     if not department_counts:
         return total_students, [], [], [], 0
 
-    highest_count = max(
-        count for _, count in department_counts
-    )
-    lowest_count = min(
-        count for _, count in department_counts
-    )
+    highest_count = max(count for _, count in department_counts)
+    lowest_count = min(count for _, count in department_counts)
 
     highest_departments = [
         (department, count)
@@ -468,17 +481,13 @@ def export_students_to_csv():
         return False
 
     with open(
-        "students.csv",
-        "w",
-        newline="",
-        encoding="utf-8"
+        "students.csv", "w",
+        newline="", encoding="utf-8"
     ) as file:
         writer = csv.writer(file)
-
         writer.writerow([
             "ID", "Name", "Roll No", "Department", "Email"
         ])
-
         writer.writerows(students)
 
     return True
@@ -491,10 +500,8 @@ def export_students_to_csv():
 def import_students_from_csv():
     try:
         with open(
-            "students.csv",
-            "r",
-            newline="",
-            encoding="utf-8"
+            "students.csv", "r",
+            newline="", encoding="utf-8"
         ) as file:
             reader = csv.DictReader(file)
 
@@ -537,7 +544,6 @@ def import_students_from_csv():
                         """, (
                             name, roll_no, department, email
                         ))
-
                         imported_count += 1
 
                     except sqlite3.IntegrityError:

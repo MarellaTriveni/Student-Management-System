@@ -11,6 +11,7 @@ from database import (
     search_by_name,
     search_by_email,
     search_by_roll_range,
+    search_by_email_domain,
     update_student,
     delete_student,
     get_statistics,
@@ -42,6 +43,11 @@ def valid_email(email):
 
 def valid_roll_number(roll_no):
     return roll_no.isdigit()
+
+
+def valid_email_domain(domain):
+    pattern = r"^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+$"
+    return re.fullmatch(pattern, domain) is not None
 
 
 # =====================================
@@ -195,9 +201,9 @@ def main():
         return
 
     while True:
-        print("\n" + "=" * 45)
-        print("      STUDENT MANAGEMENT SYSTEM")
-        print("=" * 45)
+        print("\n" + "=" * 50)
+        print("       STUDENT MANAGEMENT SYSTEM")
+        print("=" * 50)
 
         print("1. Add Student")
         print("2. View All Students")
@@ -214,9 +220,10 @@ def main():
         print("13. Department Report")
         print("14. Search Student by Email")
         print("15. Search Students by Roll Number Range")
-        print("16. Exit")
+        print("16. Search Students by Email Domain")
+        print("17. Exit")
 
-        print("=" * 45)
+        print("=" * 50)
 
         choice = input("Enter your choice: ").strip()
 
@@ -243,7 +250,7 @@ def main():
             else:
                 print("This roll number already exists.")
 
-        # 2. VIEW ALL STUDENTS
+        # 2. VIEW STUDENTS
         elif choice == "2":
             display_students(view_students())
 
@@ -264,7 +271,10 @@ def main():
 
         # 5. UPDATE STUDENT
         elif choice == "5":
-            roll_no = get_input("Enter roll number to update: ")
+            roll_no = get_input(
+                "Enter roll number to update: "
+            )
+
             student = search_student(roll_no)
 
             if not student:
@@ -290,7 +300,10 @@ def main():
 
         # 6. DELETE STUDENT
         elif choice == "6":
-            roll_no = get_input("Enter roll number to delete: ")
+            roll_no = get_input(
+                "Enter roll number to delete: "
+            )
+
             student = search_student(roll_no)
 
             if not student:
@@ -347,14 +360,14 @@ def main():
             else:
                 display_students(students)
 
-        # 10. EXPORT TO CSV
+        # 10. EXPORT CSV
         elif choice == "10":
             if export_students_to_csv():
                 print("Students exported to students.csv")
             else:
                 print("No students available to export.")
 
-        # 11. IMPORT FROM CSV
+        # 11. IMPORT CSV
         elif choice == "11":
             imported, skipped = import_students_from_csv()
 
@@ -390,13 +403,12 @@ def main():
             else:
                 print("No student found with this email.")
 
-        # 15. DAY 23: SEARCH BY ROLL NUMBER RANGE
+        # 15. SEARCH BY ROLL NUMBER RANGE
         elif choice == "15":
             try:
                 start_roll = int(
                     get_input("Enter starting roll number: ")
                 )
-
                 end_roll = int(
                     get_input("Enter ending roll number: ")
                 )
@@ -415,25 +427,40 @@ def main():
                         start_roll, end_roll
                     )
 
-                    print(
-                        f"\nStudents with roll numbers "
-                        f"between {start_roll} and {end_roll}:"
-                    )
-
                     display_students(students)
 
             except ValueError:
                 print("Please enter valid numeric roll numbers.")
 
-        # 16. EXIT
+        # 16. DAY 24: SEARCH BY EMAIL DOMAIN
         elif choice == "16":
+            domain = get_input(
+                "Enter email domain (example: gmail.com): "
+            ).lower().lstrip("@")
+
+            if not valid_email_domain(domain):
+                print(
+                    "Invalid domain. Example: gmail.com"
+                )
+                continue
+
+            students = search_by_email_domain(domain)
+
+            if students:
+                print(f"\nStudents using {domain}:")
+                display_students(students)
+            else:
+                print(f"No students found using {domain}.")
+
+        # 17. EXIT
+        elif choice == "17":
             print(
                 "Thank you for using Student Management System!"
             )
             break
 
         else:
-            print("Invalid choice. Enter a number from 1 to 16.")
+            print("Invalid choice. Enter a number from 1 to 17.")
 
 
 # =====================================
