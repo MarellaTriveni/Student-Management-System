@@ -2,8 +2,6 @@
 import re
 
 from database import (
-    check_login,
-    change_password,
     add_student,
     view_students,
     search_student,
@@ -12,19 +10,20 @@ from database import (
     search_by_email,
     search_by_roll_range,
     search_by_email_domain,
+    search_by_department_and_domain,
     update_student,
     delete_student,
     get_statistics,
+    get_department_report,
     sort_students,
     export_students_to_csv,
     import_students_from_csv,
-    get_department_report
+    check_login,
+    change_password
 )
 
 
-# =====================================
-# INPUT VALIDATION
-# =====================================
+# -------------------- INPUT VALIDATION --------------------
 
 def get_input(message):
     while True:
@@ -33,12 +32,14 @@ def get_input(message):
         if value:
             return value
 
-        print("Input cannot be empty. Try again.")
+        print("Input cannot be empty. Please try again.")
 
 
 def valid_email(email):
-    pattern = r"^[\w.-]+@[\w.-]+\.\w+$"
-    return re.fullmatch(pattern, email) is not None
+    return re.fullmatch(
+        r"[\w.-]+@[\w.-]+\.\w+",
+        email
+    ) is not None
 
 
 def valid_roll_number(roll_no):
@@ -46,115 +47,168 @@ def valid_roll_number(roll_no):
 
 
 def valid_email_domain(domain):
-    pattern = r"^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+$"
-    return re.fullmatch(pattern, domain) is not None
+    return re.fullmatch(
+        r"[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+",
+        domain
+    ) is not None
 
 
-# =====================================
-# DISPLAY STUDENTS
-# =====================================
+def get_valid_email():
+    while True:
+        email = get_input("Enter email: ")
+
+        if valid_email(email):
+            return email
+
+        print("Invalid email. Example: student@gmail.com")
+
+
+def get_valid_roll_number():
+    while True:
+        roll_no = get_input("Enter roll number: ")
+
+        if valid_roll_number(roll_no):
+            return roll_no
+
+        print("Roll number must contain digits only.")
+
+
+# -------------------- DISPLAY STUDENTS --------------------
 
 def display_students(students):
     if not students:
-        print("\nNo students found.")
+        print("No students found.")
         return
 
-    print("\n" + "=" * 100)
+    print("-" * 95)
     print(
         f"{'ID':<5}"
-        f"{'Name':<20}"
+        f"{'Name':<22}"
         f"{'Roll No':<15}"
-        f"{'Department':<15}"
-        f"{'Email':<40}"
+        f"{'Department':<20}"
+        f"{'Email':<33}"
     )
-    print("=" * 100)
+    print("-" * 95)
 
     for student in students:
+        student_id, name, roll_no, department, email = student
+
         print(
-            f"{student[0]:<5}"
-            f"{student[1][:19]:<20}"
-            f"{student[2][:14]:<15}"
-            f"{student[3][:14]:<15}"
-            f"{student[4][:39]:<40}"
+            f"{student_id:<5}"
+            f"{name[:20]:<22}"
+            f"{roll_no:<15}"
+            f"{department[:18]:<20}"
+            f"{email[:31]:<33}"
         )
 
-    print("=" * 100)
+    print("-" * 95)
 
 
-# =====================================
-# LOGIN
-# =====================================
+# -------------------- LOGIN --------------------
 
 def login():
-    print("\n" + "=" * 40)
-    print("   STUDENT MANAGEMENT SYSTEM")
-    print("=" * 40)
+    print("\n========== STUDENT MANAGEMENT SYSTEM ==========")
+    print("Please log in to continue.")
 
     for attempt in range(3):
-        username = input("Username: ").strip()
-        password = input("Password: ").strip()
+        username = get_input("Username: ")
+        password = input("Password: ")
 
         if check_login(username, password):
-            print("\nLogin successful!")
+            print(f"\nWelcome, {username}!")
             return username
 
         remaining = 2 - attempt
 
         if remaining > 0:
-            print(
-                f"Invalid login. Attempts remaining: {remaining}"
-            )
+            print(f"Invalid login. Attempts remaining: {remaining}")
 
-    print("Too many failed attempts.")
+    print("Too many failed attempts. Exiting.")
     return None
 
 
-# =====================================
-# CHANGE PASSWORD
-# =====================================
+# -------------------- ADD STUDENT --------------------
 
-def update_password(username):
-    print("\n--- Change Password ---")
+def add_student_menu():
+    name = get_input("Enter student name: ")
+    roll_no = get_valid_roll_number()
+    department = get_input("Enter department: ")
+    email = get_valid_email()
 
-    old_password = input(
-        "Enter current password: "
-    ).strip()
-
-    new_password = input(
-        "Enter new password: "
-    ).strip()
-
-    if len(new_password) < 8:
-        print("Password must be at least 8 characters.")
-        return
-
-    if new_password == old_password:
-        print("Choose a different password.")
-        return
-
-    confirm_password = input(
-        "Confirm new password: "
-    ).strip()
-
-    if new_password != confirm_password:
-        print("Passwords do not match.")
-        return
-
-    if change_password(
-        username, old_password, new_password
-    ):
-        print("Password changed successfully!")
+    if add_student(name, roll_no, department, email):
+        print("Student added successfully!")
     else:
-        print("Current password is incorrect.")
+        print("This roll number already exists.")
 
 
-# =====================================
-# DEPARTMENT REPORT
-# =====================================
+# -------------------- UPDATE STUDENT --------------------
+
+def update_student_menu():
+    roll_no = get_input("Enter roll number to update: ")
+    student = search_student(roll_no)
+
+    if not student:
+        print("Student not found.")
+        return
+
+    print("Enter the new details.")
+
+    name = get_input("New name: ")
+    department = get_input("New department: ")
+    email = get_valid_email()
+
+    result = update_student(roll_no, name, department, email)
+
+    if result:
+        print("Student updated successfully!")
+    else:
+        print("Unable to update student.")
+
+
+# -------------------- DELETE STUDENT --------------------
+
+def delete_student_menu():
+    roll_no = get_input("Enter roll number to delete: ")
+    student = search_student(roll_no)
+
+    if not student:
+        print("Student not found.")
+        return
+
+    confirmation = input(
+        f"Delete student {student[1]} ({roll_no})? (yes/no): "
+    ).strip().lower()
+
+    if confirmation == "yes":
+        if delete_student(roll_no):
+            print("Student deleted successfully!")
+        else:
+            print("Unable to delete student.")
+    else:
+        print("Deletion cancelled.")
+
+
+# -------------------- STATISTICS --------------------
+
+def show_statistics():
+    total_students, department_counts = get_statistics()
+
+    print("\n========== STUDENT STATISTICS ==========")
+    print(f"Total students: {total_students}")
+
+    if not department_counts:
+        print("No department records available.")
+        return
+
+    print("\nStudents by department:")
+
+    for department, count in department_counts:
+        print(f"{department}: {count}")
+
+
+# -------------------- DEPARTMENT REPORT --------------------
 
 def show_department_report():
-    print("\n--- Department Report ---")
-
     (
         total_students,
         department_counts,
@@ -163,98 +217,105 @@ def show_department_report():
         average_students
     ) = get_department_report()
 
-    print(f"Total Students: {total_students}")
+    print("\n========== DEPARTMENT REPORT ==========")
+    print(f"Total students: {total_students}")
 
     if not department_counts:
-        print("No department data available.")
+        print("No student records available.")
         return
 
-    print("\nDepartment-wise Count:")
+    print("\nDepartment-wise student count:")
 
     for department, count in department_counts:
         print(f"{department}: {count} students")
 
-    print("\nDepartment(s) with the most students:")
+    print("\nHighest student count:")
 
     for department, count in highest_departments:
         print(f"{department}: {count} students")
 
-    print("\nDepartment(s) with the fewest students:")
+    print("\nLowest student count:")
 
     for department, count in lowest_departments:
         print(f"{department}: {count} students")
 
     print(
         f"\nAverage students per department: "
-        f"{average_students:.1f}"
+        f"{average_students:.2f}"
     )
 
 
-# =====================================
-# MAIN PROGRAM
-# =====================================
+# -------------------- CHANGE PASSWORD --------------------
+
+def update_password(username):
+    old_password = input("Enter current password: ")
+    new_password = input("Enter new password: ")
+
+    if len(new_password) < 8:
+        print("Password must contain at least 8 characters.")
+        return
+
+    if new_password == old_password:
+        print("New password must be different from the old password.")
+        return
+
+    confirm_password = input("Confirm new password: ")
+
+    if new_password != confirm_password:
+        print("Passwords do not match.")
+        return
+
+    if change_password(username, old_password, new_password):
+        print("Password changed successfully!")
+    else:
+        print("Current password is incorrect.")
+
+
+# -------------------- MENU --------------------
+
+def display_menu():
+    print("\n========== MAIN MENU ==========")
+    print("1.  Add Student")
+    print("2.  View All Students")
+    print("3.  Search by Roll Number")
+    print("4.  Search by Name")
+    print("5.  Update Student")
+    print("6.  Delete Student")
+    print("7.  Student Statistics")
+    print("8.  Search by Department")
+    print("9.  Sort Students")
+    print("10. Export Students to CSV")
+    print("11. Import Students from CSV")
+    print("12. Change Password")
+    print("13. Department Report")
+    print("14. Search Student by Email")
+    print("15. Search by Roll Number Range")
+    print("16. Search by Email Domain")
+    print("17. Search by Department and Email Domain")
+    print("18. Exit")
+
+
+# -------------------- MAIN PROGRAM --------------------
 
 def main():
-    current_user = login()
+    username = login()
 
-    if current_user is None:
+    if username is None:
         return
 
     while True:
-        print("\n" + "=" * 50)
-        print("       STUDENT MANAGEMENT SYSTEM")
-        print("=" * 50)
+        display_menu()
+        choice = input("Enter your choice (1-18): ").strip()
 
-        print("1. Add Student")
-        print("2. View All Students")
-        print("3. Search by Roll Number")
-        print("4. Search by Name")
-        print("5. Update Student")
-        print("6. Delete Student")
-        print("7. Student Statistics")
-        print("8. Search by Department")
-        print("9. Sort Students")
-        print("10. Export Students to CSV")
-        print("11. Import Students from CSV")
-        print("12. Change Password")
-        print("13. Department Report")
-        print("14. Search Student by Email")
-        print("15. Search Students by Roll Number Range")
-        print("16. Search Students by Email Domain")
-        print("17. Exit")
-
-        print("=" * 50)
-
-        choice = input("Enter your choice: ").strip()
-
-        # 1. ADD STUDENT
+        # 1. Add student
         if choice == "1":
-            print("\n--- Add Student ---")
+            add_student_menu()
 
-            name = get_input("Enter name: ")
-            roll_no = get_input("Enter roll number: ")
-
-            if not valid_roll_number(roll_no):
-                print("Roll number must contain digits only.")
-                continue
-
-            department = get_input("Enter department: ")
-            email = get_input("Enter email: ")
-
-            if not valid_email(email):
-                print("Invalid email format.")
-                continue
-
-            if add_student(name, roll_no, department, email):
-                print("Student added successfully!")
-            else:
-                print("This roll number already exists.")
-
-        # 2. VIEW STUDENTS
+        # 2. View all students
         elif choice == "2":
             display_students(view_students())
 
-        # 3. SEARCH BY ROLL NUMBER
+        # 3. Search by roll number
         elif choice == "3":
             roll_no = get_input("Enter roll number: ")
             student = search_student(roll_no)
@@ -264,95 +325,36 @@ def main():
             else:
                 print("Student not found.")
 
-        # 4. SEARCH BY NAME
+        # 4. Search by name
         elif choice == "4":
             name = get_input("Enter student name: ")
             display_students(search_by_name(name))
 
-        # 5. UPDATE STUDENT
+        # 5. Update student
         elif choice == "5":
-            roll_no = get_input(
-                "Enter roll number to update: "
-            )
+            update_student_menu()
 
-            student = search_student(roll_no)
-
-            if not student:
-                print("Student not found.")
-                continue
-
-            name = get_input("Enter new name: ")
-            department = get_input("Enter new department: ")
-            email = get_input("Enter new email: ")
-
-            if not valid_email(email):
-                print("Invalid email format.")
-                continue
-
-            result = update_student(
-                roll_no, name, department, email
-            )
-
-            if result:
-                print("Student updated successfully!")
-            else:
-                print("No changes were made.")
-
-        # 6. DELETE STUDENT
+        # 6. Delete student
         elif choice == "6":
-            roll_no = get_input(
-                "Enter roll number to delete: "
-            )
+            delete_student_menu()
 
-            student = search_student(roll_no)
-
-            if not student:
-                print("Student not found.")
-                continue
-
-            confirm = input(
-                "Delete this student? (y/n): "
-            ).strip().lower()
-
-            if confirm == "y":
-                if delete_student(roll_no):
-                    print("Student deleted successfully!")
-                else:
-                    print("Unable to delete student.")
-            else:
-                print("Delete cancelled.")
-
-        # 7. STUDENT STATISTICS
+        # 7. Student statistics
         elif choice == "7":
-            total, departments = get_statistics()
+            show_statistics()
 
-            print("\n--- Student Statistics ---")
-            print(f"Total Students: {total}")
-            print("\nDepartment-wise Count:")
-
-            if departments:
-                for department, count in departments:
-                    print(f"{department}: {count}")
-            else:
-                print("No student records available.")
-
-        # 8. SEARCH BY DEPARTMENT
+        # 8. Search by department
         elif choice == "8":
             department = get_input("Enter department: ")
-            display_students(
-                search_by_department(department)
-            )
+            students = search_by_department(department)
+            display_students(students)
 
-        # 9. SORT STUDENTS
+        # 9. Sort students
         elif choice == "9":
             print("\n1. Sort by Name")
             print("2. Sort by Roll Number")
             print("3. Sort by Department")
 
-            sort_option = input(
-                "Choose sorting option: "
-            ).strip()
-
+            sort_option = input("Choose sorting option: ").strip()
             students = sort_students(sort_option)
 
             if students is None:
@@ -360,112 +362,109 @@ def main():
             else:
                 display_students(students)
 
-        # 10. EXPORT CSV
+        # 10. Export students to CSV
         elif choice == "10":
             if export_students_to_csv():
-                print("Students exported to students.csv")
+                print("Students exported to students.csv successfully!")
             else:
                 print("No students available to export.")
 
-        # 11. IMPORT CSV
+        # 11. Import students from CSV
         elif choice == "11":
-            imported, skipped = import_students_from_csv()
+            print("Place students.csv in your project folder first.")
+            confirmation = input(
+                "Do you want to import the file? (yes/no): "
+            ).strip().lower()
 
-            if imported == -1:
-                print("students.csv file not found.")
-            elif imported == -2:
-                print("CSV file has incorrect column headings.")
+            if confirmation == "yes":
+                imported, skipped = import_students_from_csv()
+
+                if imported == -1:
+                    print("students.csv was not found or is empty.")
+                elif imported == -2:
+                    print(
+                        "CSV headers are incorrect. Required headers: "
+                        "Name, Roll No, Department, Email"
+                    )
+                else:
+                    print(f"Students imported: {imported}")
+                    print(f"Rows skipped: {skipped}")
             else:
-                print(f"Students imported: {imported}")
-                print(f"Rows skipped: {skipped}")
+                print("Import cancelled.")
 
-        # 12. CHANGE PASSWORD
+        # 12. Change password
         elif choice == "12":
-            update_password(current_user)
+            update_password(username)
 
-        # 13. DEPARTMENT REPORT
+        # 13. Department report
         elif choice == "13":
             show_department_report()
 
-        # 14. SEARCH BY EMAIL
+        # 14. Search by email
         elif choice == "14":
-            email = get_input("Enter student email: ")
+            email = get_valid_email()
+            display_students(search_by_email(email))
 
-            if not valid_email(email):
-                print("Please enter a valid email address.")
-                continue
-
-            student = search_by_email(email)
-
-            if student:
-                print("\nStudent found!")
-                display_students([student])
-            else:
-                print("No student found with this email.")
-
-        # 15. SEARCH BY ROLL NUMBER RANGE
+        # 15. Search by roll number range
         elif choice == "15":
-            try:
-                start_roll = int(
-                    get_input("Enter starting roll number: ")
+            start_roll = get_valid_roll_number()
+            end_roll = get_valid_roll_number()
+
+            if int(start_roll) > int(end_roll):
+                print("Starting roll number must be less than or equal to ending roll number.")
+            else:
+                students = search_by_roll_range(
+                    int(start_roll),
+                    int(end_roll)
                 )
-                end_roll = int(
-                    get_input("Enter ending roll number: ")
-                )
+                display_students(students)
 
-                if start_roll < 0 or end_roll < 0:
-                    print("Roll numbers cannot be negative.")
-
-                elif start_roll > end_roll:
-                    print(
-                        "Starting roll number must be "
-                        "less than or equal to ending roll number."
-                    )
-
-                else:
-                    students = search_by_roll_range(
-                        start_roll, end_roll
-                    )
-
-                    display_students(students)
-
-            except ValueError:
-                print("Please enter valid numeric roll numbers.")
-
-        # 16. DAY 24: SEARCH BY EMAIL DOMAIN
+        # 16. Search by email domain
         elif choice == "16":
             domain = get_input(
                 "Enter email domain (example: gmail.com): "
             ).lower().lstrip("@")
 
             if not valid_email_domain(domain):
-                print(
-                    "Invalid domain. Example: gmail.com"
-                )
+                print("Invalid domain. Example: gmail.com")
+            else:
+                students = search_by_email_domain(domain)
+                display_students(students)
+
+        # 17. Day 25: Search by department AND email domain
+        elif choice == "17":
+            department = get_input("Enter department: ")
+
+            domain = get_input(
+                "Enter email domain (example: gmail.com): "
+            ).lower().lstrip("@")
+
+            if not valid_email_domain(domain):
+                print("Invalid domain. Example: gmail.com")
                 continue
 
-            students = search_by_email_domain(domain)
+            students = search_by_department_and_domain(
+                department,
+                domain
+            )
 
             if students:
-                print(f"\nStudents using {domain}:")
+                print(
+                    f"\nStudents in {department} using "
+                    f"{domain} email addresses:"
+                )
                 display_students(students)
             else:
-                print(f"No students found using {domain}.")
+                print("No matching students found.")
 
-        # 17. EXIT
-        elif choice == "17":
-            print(
-                "Thank you for using Student Management System!"
-            )
+        # 18. Exit
+        elif choice == "18":
+            print("Thank you for using Student Management System!")
             break
 
         else:
-            print("Invalid choice. Enter a number from 1 to 17.")
+            print("Invalid choice. Please enter a number from 1 to 18.")
 
-
-# =====================================
-# RUN PROGRAM
-# =====================================
 
 if __name__ == "__main__":
     main()
